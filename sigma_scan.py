@@ -63,10 +63,13 @@ class LogicTransformer(Transformer):
 
     def atom_rule(self, args):
         if args.data == 'atom':
-            if args.children[0].data == 'search_id':
+            if args.children[0] == True or args.children[0] == False:
+                return args.children[0]
+            elif args.children[0].data == 'search_id':
                 return self.identifier_rule(args.children[0].children[0].value)
             elif args[1] == '"(" pipe_rule ")"':
-                return None
+                parser = Lark(grammar, parser='lalr', transformer=LogicTransformer())
+                return parser.parse(args[1])
             elif args[1] == 'x_of':
                 return None
         return None
@@ -211,3 +214,16 @@ def analyze(event, rule_name, rule):
     print(matches)
     return matches
 
+
+parser = Lark(grammar, parser='lalr', transformer=LogicTransformer())
+
+
+def main():
+
+    for r in rules:
+        condition = get_condition(rules[r], str(r))
+        print(condition)
+        print(parser.parse(condition).pretty())
+
+
+main()
