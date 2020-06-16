@@ -20,10 +20,10 @@ grammar = '''
         
         x: "all" | NUMBER
         x_of: x "of" search_id
-            | "all of" search_id
-            | "all of them"
-            | x "of them"
-        aggregation_expression: aggregation_function "(" [aggregation_field] ")" [ "by" group_field ] comparison_op value 
+            | x "of them" -> x_of_rule
+       
+        aggregation_expression: or_rule
+                              | aggregation_function "(" [aggregation_field] ")" [ "by" group_field ] comparison_op value 
                               | near_aggregation
         aggregation_function: "count" | "min" | "max" | "avg" | "sum"
         near_aggregation: "near" or_rule
@@ -31,6 +31,7 @@ grammar = '''
         group_field: search_id
         comparison_op: ">" | "<" | "="
         value: NUMBER
+        
         NUMBER: /[1-9][0-9]*/
         NOT: "not"
 
@@ -62,16 +63,18 @@ class LogicTransformer(Transformer):
                 return hits[args]
 
     def atom_rule(self, args):
-        if args.data == 'atom':
+        if isinstance(args, list):
+            if args[0] == True or args[0] == False:
+                return args[0]
+        elif args == True or args == False:
+            return args
+        elif args.data == 'atom':
             if args.children[0] == True or args.children[0] == False:
                 return args.children[0]
             elif args.children[0].data == 'search_id':
                 return self.identifier_rule(args.children[0].children[0].value)
-            elif args[1] == '"(" pipe_rule ")"':
-                parser = Lark(grammar, parser='lalr', transformer=LogicTransformer())
-                return parser.parse(args[1])
-            elif args[1] == 'x_of':
-                return None
+            elif args.children[0].data == 'x_of':
+                return self.x_of_rule(args.children[0].children[0].value)
         return None
 
     def not_rule(self, args):
@@ -125,6 +128,14 @@ class LogicTransformer(Transformer):
                 left = left and self.or_rule(right)
             return left
         return self.or_rule(args[0])
+
+    def x_of_rule(self, args):
+        if args[0] == True or args[0] == False:
+            return args[0]
+        elif args[0].data == 'x':
+            for r in rules:
+                return analyze_x_of(event, str(r), rules[r])
+        return None
 
 
 def check_pair(event, key, value):
@@ -214,6 +225,44 @@ def analyze(event, rule_name, rule):
     print(matches)
     return matches
 
+
+def analyze_x_of(event, rule_name, rule):
+
+    condition = get_condition(rule, rule_name)
+    print('Condition: ' + condition)
+
+    indicators = re.split('[(]|[)]| of |not| and | or |[|]', condition)
+    for word in indicators:
+        if word == '':
+            indicators.remove(word)
+
+    print(indicators)
+
+    count = indicators[0]
+    search_id = indicators[1]
+
+    matches = []
+
+    for word in rule['detection']:
+        if word != 'condition':
+            if find_matches(event, get_data(rule, word)) and str(rule_name):
+                matches.append(True)
+            else:
+                matches.append(False)
+
+    print(matches)
+
+    if count == 'all':
+        if False in matches:
+            return False
+        return True
+    else:
+        count = int(count)
+        if search_id == 'them':
+            if matches.count(True) == count:
+                return True
+            return False
+        return None
 
 parser = Lark(grammar, parser='lalr', transformer=LogicTransformer())
 
