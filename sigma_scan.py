@@ -66,6 +66,8 @@ class LogicTransformer(Transformer):
         if isinstance(args, list):
             if args[0] == True or args[0] == False:
                 return args[0]
+            elif args[0].data == 'x_of':
+                return self.x_of_rule(args[0].children)
         elif args == True or args == False:
             return args
         elif args.data == 'atom':
@@ -200,12 +202,48 @@ def find_matches(event, rule):
     return flag
 
 
+def find_all_matches(event, rule):
+    """
+    matches the items in the rule to the event... iterates through the sections and if there's a list it iterates
+    through that. Uses checkPair to see if the items in the list/dictionary match items in the event log.
+    :param event: dict, event read from the sysmon log
+    :param rule: dict, dictionary of rules
+    :return: bool, whether or not we found a match
+    """
+
+    matches = []
+    if isinstance(rule, dict):
+        for k, v in rule.items():
+            if isinstance(v, list):
+                for item in v:
+                    if not check_pair(event, k, item):
+                        matches.append(False)
+                    else:
+                        matches.append(True)
+
+            else:
+                if not check_pair(event, k, v):
+                    matches.append(False)
+                else:
+                    matches.append(True)
+
+    elif isinstance(rule, list):
+            for item in rule:
+                if isinstance(item, dict):
+                    for ik, iv in item.items():
+                        if not check_pair(event, ik, iv):
+                            matches.append(False)
+                        else:
+                            matches.append(True)
+    return matches
+
+
 def analyze(event, rule_name, rule):
 
     condition = get_condition(rule, rule_name)
     print('Condition: ' + condition)
 
-    indicators = re.split('[(]|[)]| all | of | them |not| and | or |[|]', condition)
+    indicators = re.split('[(]|[)]| of |not| and | or |[|]', condition)
     for word in indicators:
         if word == '':
             indicators.remove(word)
@@ -231,7 +269,7 @@ def analyze_x_of(event, rule_name, rule):
     condition = get_condition(rule, rule_name)
     print('Condition: ' + condition)
 
-    indicators = re.split('[(]|[)]| of |not| and | or |[|]', condition)
+    indicators = re.split(' of ', condition)
     for word in indicators:
         if word == '':
             indicators.remove(word)
@@ -243,26 +281,43 @@ def analyze_x_of(event, rule_name, rule):
 
     matches = []
 
-    for word in rule['detection']:
-        if word != 'condition':
-            if find_matches(event, get_data(rule, word)) and str(rule_name):
-                matches.append(True)
-            else:
-                matches.append(False)
+    if search_id == 'them':
 
-    print(matches)
+        for word in rule['detection']:
+            if word != 'condition':
+                if find_matches(event, get_data(rule, word)) and str(rule_name):
+                    matches.append(True)
+                else:
+                    matches.append(False)
 
-    if count == 'all':
-        if False in matches:
-            return False
-        return True
-    else:
-        count = int(count)
-        if search_id == 'them':
+        print(matches)
+
+        if count == 'all':
+            if False in matches:
+                return False
+            return True
+        else:
+            count = int(count)
             if matches.count(True) == count:
                 return True
             return False
-        return None
+
+    else:
+
+        matches = find_all_matches(event, get_data(rule, search_id))
+
+        print(matches)
+
+        if count == 'all':
+            if False in matches:
+                return False
+            return True
+        else:
+            count = int(count)
+            if matches.count(True) == count:
+                return True
+            return False
+
 
 parser = Lark(grammar, parser='lalr', transformer=LogicTransformer())
 
