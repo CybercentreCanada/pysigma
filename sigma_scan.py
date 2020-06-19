@@ -1,143 +1,5 @@
-from lark import Lark, Transformer, Token, Tree
-from pathlib import Path
 from signatures import *
-from WindowsEventLogsHelper import *
 import fnmatch
-
-
-grammar = '''
-        start: pipe_rule 
-        
-        %import common.WORD   // imports from terminal library
-        %ignore " "           // Disregard spaces in text
-        
-        pipe_rule: or_rule ["|" aggregation_expression] -> pipe_rule
-        or_rule: and_rule ("or" and_rule)* -> or_rule
-        and_rule: not_rule ("and" not_rule)* -> and_rule
-        not_rule: [NOT] atom -> not_rule
-        atom: search_id | "(" pipe_rule ")" | x_of -> atom_rule
-        search_id: /[a-zA-Z_][a-zA-Z0-9_]*/
-        
-        x: "all" | NUMBER
-        x_of: x "of" search_id
-            | x "of them" -> x_of_rule
-       
-        aggregation_expression: or_rule
-                              | aggregation_function "(" [aggregation_field] ")" [ "by" group_field ] comparison_op value 
-                              | near_aggregation
-        aggregation_function: "count" | "min" | "max" | "avg" | "sum"
-        near_aggregation: "near" or_rule
-        aggregation_field: search_id
-        group_field: search_id
-        comparison_op: ">" | "<" | "="
-        value: NUMBER
-        
-        NUMBER: /[1-9][0-9]*/
-        NOT: "not"
-
-        '''
-
-SCRIPT_LOCATION = Path(__file__).resolve().parent
-# Directory of all sysmon rules
-test_rules = SCRIPT_LOCATION / Path("test_rules")
-# List of all events
-test_event = SCRIPT_LOCATION / Path("event.xml")
-
-rules = loadSignatures(test_rules)
-event = load_events(test_event)
-event = prepareEventLog(event)
-
-
-class LogicTransformer(Transformer):
-
-    def identifier_rule(self, args):
-
-        for r in rules:
-
-            if int(event['EventID']) == 22:
-                break
-
-            # Call analyze on all rules in the rule directory to find matches for each event
-            hits = analyze(event, str(r), rules[r])
-            if args in hits:
-                return hits[args]
-
-    def atom_rule(self, args):
-        if isinstance(args, list):
-            if args[0] == True or args[0] == False:
-                return args[0]
-            elif args[0].data == 'x_of':
-                return self.x_of_rule(args[0].children)
-        elif args == True or args == False:
-            return args
-        elif args.data == 'atom':
-            if args.children[0] == True or args.children[0] == False:
-                return args.children[0]
-            elif args.children[0].data == 'search_id':
-                return self.identifier_rule(args.children[0].children[0].value)
-            elif args.children[0].data == 'x_of':
-                return self.x_of_rule(args.children[0].children[0].value)
-        return None
-
-    def not_rule(self, args):
-        if args == True or args == False:
-            return args
-        elif args[0] == 'not':
-            left = self.atom_rule(args[1])
-            for right in args[1:]:
-                left = not self.atom_rule(right)
-            return left
-        return self.atom_rule(args[0])
-
-    def and_rule(self, args):
-        if args == True or args == False:
-            return args
-        elif len(args) >= 2 and (args[0] == True or args[0] == False):
-            left = args[0]
-            for right in args[1:]:
-                left = left and right
-            return left
-        elif args[0] == 'and_rule':
-            left = self.not_rule(args[1])
-            for right in args[1:]:
-                left = left and self.not_rule(right)
-            return left
-        return self.not_rule(args[0])
-
-    def or_rule(self, args):
-        if args == True or args == False:
-            return args
-        elif len(args) >= 2 and (args[0] == True or args[0] == False):
-            left = args[0]
-            for right in args[1:]:
-                left = left or right
-            return left
-        elif args[0] == 'or_rule':
-            left = self.and_rule(args[1])
-            for right in args[1:]:
-                left = left or self.and_rule(right)
-            return left
-        return self.and_rule(args[0])
-
-    def pipe_rule(self, args):
-        if args == True or args == False:
-            return args
-        elif len(args) == 2 and (args[0] == True or args[0] == False):
-            return args[0] and args[1]
-        elif args[0] == 'not':
-            left = self.or_rule(args[1])
-            for right in args[1:]:
-                left = left and self.or_rule(right)
-            return left
-        return self.or_rule(args[0])
-
-    def x_of_rule(self, args):
-        if args[0] == True or args[0] == False:
-            return args[0]
-        elif args[0].data == 'x':
-            for r in rules:
-                return analyze_x_of(event, str(r), rules[r])
-        return None
 
 
 def check_pair(event, key, value):
@@ -241,14 +103,14 @@ def find_all_matches(event, rule):
 def analyze(event, rule_name, rule):
 
     condition = get_condition(rule, rule_name)
-    print('Condition: ' + condition)
+    #print('Condition: ' + condition)
 
     indicators = re.split('[(]|[)]| of |not| and | or |[|]', condition)
     for word in indicators:
         if word == '':
             indicators.remove(word)
 
-    print(indicators)
+    #print(indicators)
 
     matches = {}
 
@@ -260,28 +122,49 @@ def analyze(event, rule_name, rule):
             else:
                 matches[word] = False
 
-    print(matches)
+    #print(matches)
     return matches
 
 
 def analyze_x_of(event, rule_name, rule):
 
     condition = get_condition(rule, rule_name)
-    print('Condition: ' + condition)
+    #print('Condition: ' + condition)
 
     indicators = re.split(' of ', condition)
     for word in indicators:
         if word == '':
             indicators.remove(word)
 
-    print(indicators)
+    #print(indicators)
 
     count = indicators[0]
     search_id = indicators[1]
 
     matches = []
 
-    if search_id == 'them':
+    if search_id.endswith('*'):
+
+        search_id = search_id.strip('*')
+
+        for word in rule['detection']:
+            if word.startswith(search_id):
+                if find_matches(event, get_data(rule, word)) and str(rule_name):
+                    matches.append(True)
+                else:
+                    matches.append(False)
+
+        if count == 'all':
+            if False in matches:
+                return False
+            return True
+        else:
+            count = int(count)
+            if matches.count(True) == count:
+                return True
+            return False
+
+    elif search_id == 'them':
 
         for word in rule['detection']:
             if word != 'condition':
@@ -290,7 +173,7 @@ def analyze_x_of(event, rule_name, rule):
                 else:
                     matches.append(False)
 
-        print(matches)
+        #print(matches)
 
         if count == 'all':
             if False in matches:
@@ -306,7 +189,7 @@ def analyze_x_of(event, rule_name, rule):
 
         matches = find_all_matches(event, get_data(rule, search_id))
 
-        print(matches)
+        #print(matches)
 
         if count == 'all':
             if False in matches:
@@ -319,15 +202,7 @@ def analyze_x_of(event, rule_name, rule):
             return False
 
 
-parser = Lark(grammar, parser='lalr', transformer=LogicTransformer())
 
 
-def main():
-
-    for r in rules:
-        condition = get_condition(rules[r], str(r))
-        print(condition)
-        print(parser.parse(condition).pretty())
 
 
-main()
