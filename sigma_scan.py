@@ -131,10 +131,16 @@ def analyze_x_of(event, rule_name, rule):
     condition = get_condition(rule, rule_name)
     #print('Condition: ' + condition)
 
-    indicators = re.split(' of ', condition)
+    indicators = re.split('[(]|[)]| of |not| and | or |[|]', condition)
+    valid_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
     for word in indicators:
         if word == '':
             indicators.remove(word)
+        elif indicators[0] not in valid_chars:
+            if word != 'all':
+                indicators.remove(word)
+        if word == 'all' or indicators[0] in valid_chars:
+            break
 
     #print(indicators)
 
