@@ -176,20 +176,20 @@ def analyze_x_of(event, rule_name, rule):
             if word != 'condition':
                 if find_matches(event, get_data(rule, word)) and str(rule_name):
                     matches.append(True)
+                    if count != 'all':
+                        count = int(count)
+                        if matches.count(True) == count:
+                            return True
                 else:
                     matches.append(False)
+                    if count == 'all':
+                        return False
 
         #print(matches)
 
         if count == 'all':
-            if False in matches:
-                return False
             return True
-        else:
-            count = int(count)
-            if matches.count(True) == count:
-                return True
-            return False
+        return False
 
     else:
 

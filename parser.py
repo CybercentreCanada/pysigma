@@ -7,7 +7,7 @@ from build_alert import *
 SCRIPT_LOCATION = Path(__file__).resolve().parent
 # Directory of all sysmon rules
 test_rules = SCRIPT_LOCATION / Path("test_rules")
-test_event = SCRIPT_LOCATION / Path("test_a.xml")
+test_event = SCRIPT_LOCATION / Path("test_n.xml")
 
 rules = loadSignatures(test_rules)
 event = load_events(test_event)
@@ -152,7 +152,10 @@ def main():
         result = parser.parse(condition).pretty()
         print(result)
         if 'True' in result:
-            hit = callback_buildReport(alerts, alert(str(r), get_description(rules[r]), event, get_level(rules[r]), get_yaml_name(rules[r])))
+            if 'timeframe' in rules[r]['detection']:
+                return None
+            else:
+                callback_buildReport(alerts, alert(str(r), get_description(rules[r]), event, get_level(rules[r]), get_yaml_name(rules[r])))
     print('\033[4mAlerts\033[0m')
     print(alerts)
 
