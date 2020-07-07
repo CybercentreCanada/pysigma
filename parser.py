@@ -3,17 +3,19 @@ from pathlib import Path
 from WindowsEventLogsHelper import *
 from sigma_scan import *
 from build_alert import *
+from datetime import datetime
 
 SCRIPT_LOCATION = Path(__file__).resolve().parent
 # Directory of all sysmon rules
 test_rules = SCRIPT_LOCATION / Path("test_rules")
-test_event = SCRIPT_LOCATION / Path("test_n.xml")
+test_event = SCRIPT_LOCATION / Path("dllload1.xml")
 
 rules = loadSignatures(test_rules)
 event = load_events(test_event)
 event = prepareEventLog(event)
 
 rule = None
+timed_events = {}
 
 grammar = '''
         start: pipe_rule 
@@ -143,6 +145,7 @@ parser = Lark(grammar, parser='lalr', transformer=LogicTransformer())
 def main():
 
     alerts = []
+    #timed_events = {}
 
     for r in rules:
         global rule
@@ -153,9 +156,43 @@ def main():
         print(result)
         if 'True' in result:
             if 'timeframe' in rules[r]['detection']:
-                return None
+                timeframe = rules[r]['detection']['timeframe']
+
+                if timeframe.endswith('M'):
+                    time_limit = int(timeframe.strip('M')) * 30
+                elif timeframe.endswith('d'):
+                    time_limit = int(timeframe.strip('d'))
+                elif timeframe.endswith('h'):
+                    time_limit = int(timeframe.strip('h')) * 3600
+                elif timeframe.endswith('m'):
+                    time_limit = int(timeframe.strip('m')) * 60
+                elif timeframe.endswith('s'):
+                    time_limit = int(timeframe.strip('s'))
+
+                if str(r) in timed_events:
+                    time = datetime.strptime(event['UtcTime'], '%Y-%m-%d %H:%M:%S.%f')
+                    timed_events[str(r)].append(time)
+                    event1 = timed_events[str(r)][0]
+                    event2 = timed_events[str(r)][1]
+
+                    if 'M' in timeframe or 'd' in timeframe:
+                        time_taken = abs((event1 - event2).days)
+                    else:
+                        time_taken = abs((event1 - event2).total_seconds())
+
+                    if 0 <= time_taken <= time_limit:
+                        callback_buildReport(alerts, alert(str(r), get_description(rules[r]), event, get_level(rules[r]), get_yaml_name(rules[r])))
+                        del timed_events[str(r)]
+
+                    else:
+                        del timed_events[str(r)]
+
+                else:
+                    time = datetime.strptime(event['UtcTime'], '%Y-%m-%d %H:%M:%S.%f')
+                    timed_events[str(r)] = [time]
             else:
                 callback_buildReport(alerts, alert(str(r), get_description(rules[r]), event, get_level(rules[r]), get_yaml_name(rules[r])))
+
     print('\033[4mAlerts\033[0m')
     print(alerts)
 
