@@ -1,10 +1,11 @@
 from typing import Dict
 from lark import Lark, Transformer
 from pathlib import Path
-from WindowsEventLogsHelper import *
-from sigma_scan import *
-from build_alert import *
-from datetime import datetime
+from WindowsEventLogsHelper import load_events, prepareEventLog
+from build_alert import callback_buildReport, Alert, check_timeframe
+from sigma_scan import analyze_x_of, analyze
+from signatures import loadSignatures, get_condition, get_description, get_level, get_yaml_name
+
 
 SCRIPT_LOCATION = Path(__file__).resolve().parent
 # Directory of all sysmon rules
@@ -150,7 +151,6 @@ def main():
         event = prepareEventLog(event)
 
         alerts = []
-   # timed_events = {}
 
         for rule_name, rule_obj in rules.items():
             global rule
@@ -162,45 +162,9 @@ def main():
 
             if 'True' in result:
                 if 'timeframe' in rule_obj['detection']:
-                    timeframe = rule_obj['detection']['timeframe']
-
-                    # time_limit = default_time_limit
-                    if timeframe.endswith('M'):
-                        time_limit = int(timeframe.strip('M')) * 30
-                    elif timeframe.endswith('d'):
-                        time_limit = int(timeframe.strip('d'))
-                    elif timeframe.endswith('h'):
-                        time_limit = int(timeframe.strip('h')) * 3600
-                    elif timeframe.endswith('m'):
-                        time_limit = int(timeframe.strip('m')) * 60
-                    elif timeframe.endswith('s'):
-                        time_limit = int(timeframe.strip('s'))
-                    else:
-                        raise ValueError(timeframe)
-
-                    if rule_name in timed_events:
-                        time = datetime.strptime(event['UtcTime'], '%Y-%m-%d %H:%M:%S.%f')
-                        timed_events[rule_name].append(time)
-                        event1 = timed_events[rule_name][0]
-                        event2 = timed_events[rule_name][1]
-
-                        if 'M' in timeframe or 'd' in timeframe:
-                            time_taken = abs((event1 - event2).days)
-                        else:
-                            time_taken = abs((event1 - event2).total_seconds())
-
-                        if 0 <= time_taken <= time_limit:
-                            callback_buildReport(alerts, alert(rule_name, get_description(rule_obj), event, get_level(rule_obj), get_yaml_name(rule_obj)))
-                            del timed_events[rule_name]
-
-                        else:
-                            del timed_events[rule_name]
-
-                    else:
-                        time = datetime.strptime(event['UtcTime'], '%Y-%m-%d %H:%M:%S.%f')
-                        timed_events[rule_name] = [time]
+                    check_timeframe(rule_obj, rule_name, timed_events, event, alerts)
                 else:
-                    callback_buildReport(alerts, alert(rule_name, get_description(rule_obj), event, get_level(rule_obj), get_yaml_name(rule_obj)))
+                    callback_buildReport(alerts, Alert(rule_name, get_description(rule_obj), event, get_level(rule_obj), get_yaml_name(rule_obj)))
 
         print('\033[4mAlerts\033[0m')
         print(alerts)
