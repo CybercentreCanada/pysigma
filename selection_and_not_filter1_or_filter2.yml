@@ -1,0 +1,43 @@
+title: Selection and Not (Filter1 or Filter2)
+status: experimental
+description: Detects a Windows command line executable started from MSHTA.
+references:
+    - https://www.trustedsec.com/july-2015/malicious-htas/
+author: Michael Haag
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 304
+        ParentImage: 'C:\Windows\explorer.exe'
+        Image:
+            - 'C:\Windows\System32\notepad.exe'
+            - '*\powershell.exe'
+            - '*\wscript.exe'
+            - '*\cscript.exe'
+            - '*\sh.exe'
+            - '*\bash.exe'
+            - '*\reg.exe'
+            - '*\regsvr32.exe'
+            - '*\BITSADMIN*'
+    filter1:
+        CommandLine:
+            - '*/HP/HP*'
+            - '*\HP\HP*'
+    filter2:
+        CommandLine:
+            - '*/HP/HP*'
+            - '*\HP\HP*'
+    condition: selection and not (filter1 or filter2)
+fields:
+    - CommandLine
+    - ParentCommandLine
+tags:
+    - attack.defense_evasion
+    - attack.execution
+    - attack.t1170
+falsepositives:
+    - Printer software / driver installations
+level: high
+
