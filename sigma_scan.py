@@ -1,5 +1,10 @@
-from signatures import *
+
 import fnmatch
+import re
+import base64
+
+from codecs import encode
+from signatures import get_condition, get_data
 
 
 def check_pair(event, key, value):
@@ -11,9 +16,51 @@ def check_pair(event, key, value):
     :return: bool,
     """
 
+    if '|' in key:
+        modifiers = re.split('[|]', key)
+        for word in modifiers:
+            if word == '':
+                modifiers.remove(word)
+        key = modifiers[0]
+        modifiers.remove(modifiers[0])
+
+    else:
+        modifiers = []
+
     if key in event:
-        if '*' in str(value):
+        if len(modifiers) > 0:
+            flag = False
+            for word in modifiers:
+                if word == 'contains':
+                    if value in str(event[key]):
+                        flag = True
+                elif word == 'all':
+                    return None
+                elif word == 'base64':
+                    if str(event[key]) == str(base64.encodebytes(value)):
+                        flag = True
+                elif word == 'base64offset':
+                    return None
+                elif word == 'endswith':
+                    if str(event[key]).endswith(value):
+                        flag = True
+                elif word == 'startswith':
+                    if str(event[key]).startswith(value):
+                        flag = True
+                elif word == 'utf16le' or word == 'wide':
+                    if str(event[key]) == str(encode(value, encoding='utf-16le')):
+                        flag = True
+                elif word == 'utf16be':
+                    if str(event[key]) == str(encode(value, encoding='utf-16be')):
+                        flag = True
+                elif word == 'utf16':
+                    if str(event[key]) == str(encode(value, encoding='utf-16')):
+                        flag = True
+            return flag
+
+        elif '*' in str(value):
             return fnmatch.fnmatch(event[key], value)
+
         else:
             try:
                 return str(event[key]) == str(value)
