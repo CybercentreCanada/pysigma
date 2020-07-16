@@ -9,8 +9,8 @@ from signatures import loadSignatures, get_condition, get_description, get_level
 
 SCRIPT_LOCATION = Path(__file__).resolve().parent
 # Directory of all sysmon rules
-test_rules = SCRIPT_LOCATION / Path("test_rules")
-test_events = [SCRIPT_LOCATION / Path("dllload1.xml"), SCRIPT_LOCATION / Path("dllload2.xml"), SCRIPT_LOCATION / Path("test_a.xml"), SCRIPT_LOCATION / Path("test_b1.xml"), SCRIPT_LOCATION / Path("test_b2.xml"), SCRIPT_LOCATION / Path("test_c.xml"), SCRIPT_LOCATION / Path("test_d.xml"), SCRIPT_LOCATION / Path("test_e.xml"), SCRIPT_LOCATION / Path("test_f.xml"), SCRIPT_LOCATION / Path("test_g.xml"), SCRIPT_LOCATION / Path("test_h.xml"), SCRIPT_LOCATION / Path("test_i.xml"), SCRIPT_LOCATION / Path("test_j.xml"), SCRIPT_LOCATION / Path("test_k.xml"), SCRIPT_LOCATION / Path("test_l.xml"), SCRIPT_LOCATION / Path("test_m.xml"), SCRIPT_LOCATION / Path("test_n.xml")]
+test_rules = SCRIPT_LOCATION / Path("rules")
+test_events = [SCRIPT_LOCATION / Path("modifier_test.xml")]
 
 rules: Dict[str, Dict] = loadSignatures(test_rules)
 

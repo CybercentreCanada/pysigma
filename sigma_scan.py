@@ -32,30 +32,44 @@ def check_pair(event, key, value):
             flag = False
             for word in modifiers:
                 if word == 'contains':
-                    if value in str(event[key]):
+                    if str(value) in str(event[key]):
                         flag = True
+                    else:
+                        flag = False
                 elif word == 'all':
                     return None
                 elif word == 'base64':
-                    if str(event[key]) == str(base64.encodebytes(value)):
+                    if str(event[key]) == str(base64.encodebytes(bytes(value))):
                         flag = True
+                    else:
+                        flag = False
                 elif word == 'base64offset':
                     return None
                 elif word == 'endswith':
-                    if str(event[key]).endswith(value):
+                    if str(event[key]).endswith(str(value)):
                         flag = True
+                    else:
+                        flag = False
                 elif word == 'startswith':
-                    if str(event[key]).startswith(value):
+                    if str(event[key]).startswith(str(value)):
                         flag = True
+                    else:
+                        flag = False
                 elif word == 'utf16le' or word == 'wide':
-                    if str(event[key]) == str(encode(value, encoding='utf-16le')):
+                    if str(event[key]) == str(encode(str(value), encoding='utf-16le')):
                         flag = True
+                    else:
+                        flag = False
                 elif word == 'utf16be':
-                    if str(event[key]) == str(encode(value, encoding='utf-16be')):
+                    if str(event[key]) == str(encode(str(value), encoding='utf-16be')):
                         flag = True
+                    else:
+                        flag = False
                 elif word == 'utf16':
-                    if str(event[key]) == str(encode(value, encoding='utf-16')):
+                    if str(event[key]) == str(encode(str(value), encoding='utf-16')):
                         flag = True
+                    else:
+                        flag = False
             return flag
 
         elif '*' in str(value):
