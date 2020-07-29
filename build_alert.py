@@ -48,10 +48,10 @@ def check_timeframe(rule_dict, rule_name, timed_events, event, alert_list):
     Checks & keeps track of events with the same specified timefram requirement.
     If both events are hit on, an alert is created.
 
-    :param rule_dict: dict, dictionary containing the rule info from Sysmon .yml files
+    :param rule_dict: dict, dictionary containing the rule info from Sigma .yml files
     :param rule_name: str, name of rule
     :param timed_events: dict, dictionary of events with the specified timeframe requirement
-    :param event: dict, event read from the sysmon log
+    :param event: dict, event read from the Sysmon log
     :param alert_list: list, list of indicator names which have been hit on
     """
 

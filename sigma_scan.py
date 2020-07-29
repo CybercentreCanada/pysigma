@@ -96,7 +96,7 @@ def find_matches(event, rule_dict):
     through that. Uses checkPair to see if the items in the list/dictionary match items in the event log.
 
     :param event: dict, event read from the Sysmon log
-    :param rule_dict: dict, dictionary containing the rule info from Sysmon .yml files.
+    :param rule_dict: dict, dictionary containing the rule info from Sigma .yml files.
     :return: bool, whether or not we found a match
     """
 
@@ -137,8 +137,8 @@ def find_all_matches(event, rule_dict):
     through that. Uses checkPair to see if the items in the list/dictionary match items in the event log.
     Keeps track of number of both False and True matches.
 
-    :param event: dict, event read from the sysmon log
-    :param rule_dict: dict, dictionary containing the rule info from Sysmon .yml files.
+    :param event: dict, event read from the Sysmon log
+    :param rule_dict: dict, dictionary containing the rule info from Sigma .yml files.
     :return: list, list of False/True matches
     """
 
@@ -173,9 +173,9 @@ def analyze(event, rule_name, rule_dict):
     """
     Analyzes the truth value of each condition specified within the condition string of the rule.
 
-    :param event: dict, event read from the sysmon log
+    :param event: dict, event read from the Sysmon log
     :param rule_name: str, name of the rule
-    :param rule_dict: dict, dictionary containing the rule info from Sysmon .yml files.
+    :param rule_dict: dict, dictionary containing the rule info from Sigma .yml files.
     :return: dict, dictionary of truth values
     """
 
@@ -203,9 +203,9 @@ def analyze_x_of(event, rule_name, rule_dict):
     """
     Analyzes the truth value of an 'x of' condition specified within the condition string of the rule.
 
-    :param event: dict, event read from the sysmon log
+    :param event: dict, event read from the Sysmon log
     :param rule_name: str, name of the rule
-    :param rule_dict: dict, dictionary containing the rule info from Sysmon .yml files
+    :param rule_dict: dict, dictionary containing the rule info from Sigma .yml files
     :return: bool, truth value of 'x of' condition
     """
 

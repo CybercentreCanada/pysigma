@@ -18,7 +18,7 @@ event = None
 rule = None
 timed_events = {}
 
-# Grammar defined for the condition strings within the Sysmon rules
+# Grammar defined for the condition strings within the Sigma rules
 grammar = '''
         start: pipe_rule 
 
@@ -55,7 +55,7 @@ grammar = '''
 class LogicTransformer(Transformer):
     """
     Defines what each rule (as specified within the grammar) is meant to do, in order to determine the truth value of the
-    condition string within each Sysmon .yml file.
+    condition string within each Sigma .yml file.
     Works recursively.
     """
 

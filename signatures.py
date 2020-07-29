@@ -129,7 +129,7 @@ def get_yaml_name(rule_dict):
     """
     Gets file name of yaml rule that was hit on
 
-    :param rule_dict: dict, our dictionary containing the rule info from Sysmon .yml files.
+    :param rule_dict: dict, our dictionary containing the rule info from Sigma .yml files.
     :return: str, filename of the rule
     """
 
@@ -140,7 +140,7 @@ def get_description(rule_dict):
     """
     Gets the description of the rule for the result log.
 
-    :param rule_dict: dict, our dictionary containing the rule info from Sysmon .yml files.
+    :param rule_dict: dict, our dictionary containing the rule info from Sigma .yml files.
     :return: str, description of the rule
     """
 
@@ -151,7 +151,7 @@ def get_condition(rule_dict, condition):
     """
     Gets the condition string from the rule for the analyze function.
 
-    :param rule_dict: dict, our dictionary containing the rule info from Sysmon .yml files.
+    :param rule_dict: dict, our dictionary containing the rule info from Sigma .yml files.
     :param condition: Condition we wish to analyze.
     :return: str, the condition for the rule, returned as a string.
     """
@@ -168,7 +168,7 @@ def get_data(rule_dict, key):
     """
     Pulls out the data from a specific section in detection.
 
-    :param rule_dict: dict, our dictionary containing the rule info from Sysmon .yml files.
+    :param rule_dict: dict, our dictionary containing the rule info from Sigma .yml files.
     :param key: str, name of field we wish to extract info from within the detection field of the rule dict.
     :return dict: sub-dict of selected info from given field.
     """
@@ -185,7 +185,7 @@ def get_level(rule_dict):
     """
     Gets the level of the rule.
 
-    :param rule_dict: dict, our dictionary containing the rule info from Sysmon .yml files.
+    :param rule_dict: dict, our dictionary containing the rule info from Sigma .yml files.
     :return: str, level of the rule
     """
 
