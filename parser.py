@@ -9,8 +9,8 @@ from signatures import loadSignatures, get_condition, get_description, get_level
 SCRIPT_LOCATION = Path(__file__).resolve().parent
 
 # Rules & events to be tested
-test_rules = SCRIPT_LOCATION / Path("rules")
-test_events = [SCRIPT_LOCATION / Path("modifier_test.xml")]
+test_rules = SCRIPT_LOCATION / Path("test_rules")
+test_events = [SCRIPT_LOCATION / Path("test_a.xml")]
 
 rules: Dict[str, Dict] = loadSignatures(test_rules)
 
@@ -173,6 +173,7 @@ def main():
                     callback_buildReport(alerts, Alert(rule_name, get_description(rule_obj), event, get_level(rule_obj), get_yaml_name(rule_obj)))
 
         print('\033[4mAlerts\033[0m')
+        print('Event: ' + e.name)
         print(alerts)
 
 
