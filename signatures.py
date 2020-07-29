@@ -6,7 +6,8 @@ import re
 def loadSignatures(signatureDir):
     """
     Load all Sigma signatures from a directory
-    :param signatureDir: Directory which contains all sigma signature to load
+
+    :param signatureDir: Directory which contains all Sigma signature to load
     :return: A dictionary containing all loaded signatures
     """
 
@@ -42,8 +43,9 @@ def loadSignatures(signatureDir):
 
 def escape_compatible(detect):
     """
-    Look through a yaml signature detection section and replaces all escape characters with just the characters to be
+    Looks through a yaml signature detection section and replaces all escape characters with just the characters to be
     compatible ( i.e. \\ --> \ )
+
     :param detect: dict, detection section of the yaml signature
     :return: dict, fixed detection section
     """
@@ -126,7 +128,8 @@ def escape_compatible(detect):
 def get_yaml_name(rule_dict):
     """
     Gets file name of yaml rule that was hit on
-    :param rule_dict: dict, our dictionary containing the rule info from sysmon .yml files.
+
+    :param rule_dict: dict, our dictionary containing the rule info from Sysmon .yml files.
     :return: str, filename of the rule
     """
 
@@ -136,7 +139,8 @@ def get_yaml_name(rule_dict):
 def get_description(rule_dict):
     """
     Gets the description of the rule for the result log.
-    :param rule_dict: dict, our dictionary containing the rule info from sysmon .yml files.
+
+    :param rule_dict: dict, our dictionary containing the rule info from Sysmon .yml files.
     :return: str, description of the rule
     """
 
@@ -146,8 +150,9 @@ def get_description(rule_dict):
 def get_condition(rule_dict, condition):
     """
     Gets the condition string from the rule for the analyze function.
-    :param rule_dict: dict, our dictionary containing the rule info from sysmon .yml files.
-    :param condition: Condition we wish to analyze .
+
+    :param rule_dict: dict, our dictionary containing the rule info from Sysmon .yml files.
+    :param condition: Condition we wish to analyze.
     :return: str, the condition for the rule, returned as a string.
     """
 
@@ -161,10 +166,11 @@ def get_condition(rule_dict, condition):
 
 def get_data(rule_dict, key):
     """
-    pulls out the data from a specific section in detection.
-    :param rule_dict: dict, our dictionary containing the rule info from sysmon .yml files.
+    Pulls out the data from a specific section in detection.
+
+    :param rule_dict: dict, our dictionary containing the rule info from Sysmon .yml files.
     :param key: str, name of field we wish to extract info from within the detection field of the rule dict.
-    :return: dict, sub-dict of selected info from given field.
+    :return dict: sub-dict of selected info from given field.
     """
 
     try:
@@ -178,7 +184,8 @@ def get_data(rule_dict, key):
 def get_level(rule_dict):
     """
     Gets the level of the rule.
-    :param rule_dict: dict, our dictionary containing the rule info from sysmon .yml files.
+
+    :param rule_dict: dict, our dictionary containing the rule info from Sysmon .yml files.
     :return: str, level of the rule
     """
 

@@ -19,7 +19,8 @@ class Alert:
 def callback_buildReport(alert_list, alert):
     """
     Creates result entry with alert object, and provides a score relative to the rule level
-    :param context: list, list of indicator names which have been hit on
+
+    :param alert_list: list, list of indicator names which have been hit on
     :param alert: alert_obj, contains rule title, description, level, and the event
     """
 
@@ -42,9 +43,19 @@ def callback_buildReport(alert_list, alert):
     alert_list.append(alertItem)
 
 
-def check_timeframe(rule_obj, rule_name, timed_events, event, alerts):
+def check_timeframe(rule_dict, rule_name, timed_events, event, alert_list):
+    """
+    Checks & keeps track of events with the same specified timefram requirement.
+    If both events are hit on, an alert is created.
 
-    timeframe = rule_obj['detection']['timeframe']
+    :param rule_dict: dict, dictionary containing the rule info from Sysmon .yml files
+    :param rule_name: str, name of rule
+    :param timed_events: dict, dictionary of events with the specified timeframe requirement
+    :param event: dict, event read from the sysmon log
+    :param alert_list: list, list of indicator names which have been hit on
+    """
+
+    timeframe = rule_dict['detection']['timeframe']
 
     if timeframe.endswith('M'):
         time_limit = int(timeframe.strip('M')) * 30
@@ -71,8 +82,8 @@ def check_timeframe(rule_obj, rule_name, timed_events, event, alerts):
             time_taken = abs((event1 - event2).total_seconds())
 
         if 0 <= time_taken <= time_limit:
-            callback_buildReport(alerts, Alert(rule_name, get_description(rule_obj), event, get_level(rule_obj),
-                                               get_yaml_name(rule_obj)))
+            callback_buildReport(alert_list, Alert(rule_name, get_description(rule_dict), event, get_level(rule_dict),
+                                                   get_yaml_name(rule_dict)))
             del timed_events[rule_name]
 
         else:

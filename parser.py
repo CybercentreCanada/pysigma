@@ -6,9 +6,9 @@ from build_alert import callback_buildReport, Alert, check_timeframe
 from sigma_scan import analyze_x_of, analyze
 from signatures import loadSignatures, get_condition, get_description, get_level, get_yaml_name
 
-
 SCRIPT_LOCATION = Path(__file__).resolve().parent
-# Directory of all sysmon rules
+
+# Rules & events to be tested
 test_rules = SCRIPT_LOCATION / Path("rules")
 test_events = [SCRIPT_LOCATION / Path("modifier_test.xml")]
 
@@ -18,6 +18,7 @@ event = None
 rule = None
 timed_events = {}
 
+# Grammar defined for the condition strings within the Sysmon rules
 grammar = '''
         start: pipe_rule 
 
@@ -52,12 +53,13 @@ grammar = '''
 
 
 class LogicTransformer(Transformer):
+    """
+    Defines what each rule (as specified within the grammar) is meant to do, in order to determine the truth value of the
+    condition string within each Sysmon .yml file.
+    Works recursively.
+    """
 
     def identifier_rule(self, args):
-
-        #if int(event['EventID']) == 22:
-         #   break
-
         # Call analyze on all rules in the rule directory to find matches for each event
         hits = analyze(event, str(rule), rules[rule])
         if args in hits:
@@ -140,10 +142,16 @@ class LogicTransformer(Transformer):
         return None
 
 
+# Create & initialize Lark class instance
 parser = Lark(grammar, parser='lalr', transformer=LogicTransformer())
 
 
 def main():
+    """
+    Main function tests every event against every rule in the provided directory to generate a list of alerts
+    (per event) for which rules have been hit on.
+     
+    """
 
     for e in test_events:
         global event
@@ -156,9 +164,7 @@ def main():
             global rule
             rule = rule_name
             condition = get_condition(rule_obj, rule_name)
-            #print('Condition: ' + condition)
             result = parser.parse(condition).pretty()
-            #print(result)
 
             if 'True' in result:
                 if 'timeframe' in rule_obj['detection']:
