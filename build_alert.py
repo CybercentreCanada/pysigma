@@ -45,7 +45,7 @@ def callback_buildReport(alert_list, alert):
 
 def check_timeframe(rule_dict, rule_name, timed_events, event, alert_list):
     """
-    Checks & keeps track of events with the same specified timefram requirement.
+    Checks & keeps track of events with the same specified timeframe requirement.
     If both events are hit on, an alert is created.
 
     :param rule_dict: dict, dictionary containing the rule info from Sigma .yml files

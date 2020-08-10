@@ -80,6 +80,12 @@ def check_pair(event, key, value):
         elif '*' in str(value):
             return fnmatch.fnmatch(event[key], value)
 
+        elif str(value) == '' or str(value) == 'null':
+            try:
+                return str(event[key]) == ''
+            except:
+                return event[key] == ''
+
         else:
             try:
                 return str(event[key]) == str(value)
@@ -87,6 +93,8 @@ def check_pair(event, key, value):
                 return event[key] == str(value)
 
     else:
+        if str(value) == '' or str(value) == 'null':
+            return True
         return False
 
 
