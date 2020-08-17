@@ -202,15 +202,17 @@ def analyze_x_of(event, rule_name, rule_dict):
     indicators = re.split('[(]|[)]| of |not| and | or |[|]', condition)
     valid_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
     for word in indicators:
-        if word == '':
+        if indicators[0] == '':
+            indicators.remove(indicators[0])
+        elif word == '':
             indicators.remove(word)
-        elif indicators[0] not in valid_chars:
+        elif indicators[0].strip() not in valid_chars:
             if word != 'all':
                 indicators.remove(word)
-        if word == 'all' or indicators[0] in valid_chars:
+        if word == 'all' or indicators[0].strip() in valid_chars:
             break
 
-    count = indicators[0]
+    count = indicators[0].strip()
     search_id = indicators[1]
 
     matches = []

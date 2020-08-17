@@ -157,7 +157,7 @@ def get_condition(rule_dict, condition):
     """
 
     try:
-        return rule_dict['detection']['condition']
+        return (rule_dict['detection']['condition']).lower()
 
     except KeyError:
         print("Error: No Condition Found: " + str(condition))

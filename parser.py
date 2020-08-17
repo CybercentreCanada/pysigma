@@ -1,4 +1,3 @@
-from github import Github
 from typing import Dict
 from lark import Lark, Transformer
 from pathlib import Path
@@ -6,11 +5,12 @@ from WindowsEventLogsHelper import load_events, prepareEventLog
 from build_alert import callback_buildReport, Alert, check_timeframe
 from sigma_scan import analyze_x_of, analyze
 from signatures import loadSignatures, get_condition, get_description, get_level, get_yaml_name
+import re
 
 SCRIPT_LOCATION = Path(__file__).resolve().parent
 
 # Rules & events to be tested
-test_rules = SCRIPT_LOCATION / Path("test_rules")
+test_rules = SCRIPT_LOCATION / Path("rules1")
 test_events = []
 
 rules: Dict[str, Dict] = loadSignatures(test_rules)
@@ -147,10 +147,10 @@ def main():
     (per event) for which rules have been hit on.
 
     """
-    add_event = input('Enter event log to test (or \'done\'): ')
-    while add_event.lower() != 'done':
-        test_events.append(SCRIPT_LOCATION / Path(add_event))
-        add_event = input('Enter event log to test (or \'done\'): ')
+    add_events = input('Enter event logs to test: ')
+    event_list = re.split(', ', add_events)
+    for evt in event_list:
+        test_events.append(SCRIPT_LOCATION / Path(evt))
     print()
 
     for e in test_events:
@@ -176,6 +176,7 @@ def main():
         print('\033[4mAlerts\033[0m')
         print('Event: ' + e.name)
         print(alerts)
+        print()
 
 
 main()
