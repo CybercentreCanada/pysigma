@@ -1,3 +1,4 @@
+from github import Github
 from typing import Dict
 from lark import Lark, Transformer
 from pathlib import Path
@@ -10,7 +11,15 @@ SCRIPT_LOCATION = Path(__file__).resolve().parent
 
 # Rules & events to be tested
 test_rules = SCRIPT_LOCATION / Path("test_rules")
-test_events = [SCRIPT_LOCATION / Path("test_a.xml")]
+test_events = [SCRIPT_LOCATION / Path("test_a.xml"), SCRIPT_LOCATION / Path("test_b1.xml"),
+               SCRIPT_LOCATION / Path("test_b2.xml"), SCRIPT_LOCATION / Path("test_c.xml"),
+               SCRIPT_LOCATION / Path("test_d.xml"), SCRIPT_LOCATION / Path("test_e.xml"),
+               SCRIPT_LOCATION / Path("test_f.xml"), SCRIPT_LOCATION / Path("test_g.xml"),
+               SCRIPT_LOCATION / Path("test_h.xml"), SCRIPT_LOCATION / Path("test_i.xml"),
+               SCRIPT_LOCATION / Path("test_j.xml"), SCRIPT_LOCATION / Path("test_k.xml"),
+               SCRIPT_LOCATION / Path("test_l.xml"), SCRIPT_LOCATION / Path("test_m.xml"),
+               SCRIPT_LOCATION / Path("test_n.xml"), SCRIPT_LOCATION / Path("dllload1.xml"),
+               SCRIPT_LOCATION / Path("dllload2.xml"), SCRIPT_LOCATION / Path("modifier_test.xml")]
 
 rules: Dict[str, Dict] = loadSignatures(test_rules)
 
@@ -21,21 +30,17 @@ timed_events = {}
 # Grammar defined for the condition strings within the Sigma rules
 grammar = '''
         start: pipe_rule 
-
         %import common.WORD   // imports from terminal library
         %ignore " "           // Disregard spaces in text
-
         pipe_rule: or_rule ["|" aggregation_expression] -> pipe_rule
         or_rule: and_rule ("or" and_rule)* -> or_rule
         and_rule: not_rule ("and" not_rule)* -> and_rule
         not_rule: [NOT] atom -> not_rule
         atom: search_id | "(" pipe_rule ")" | x_of -> atom_rule
         search_id: /[a-zA-Z_][a-zA-Z0-9*_]*/
-
         x: "all" | NUMBER
         x_of: x "of" search_id
             | x "of them" -> x_of_rule
-
         aggregation_expression: or_rule
                               | aggregation_function "(" [aggregation_field] ")" [ "by" group_field ] comparison_op value 
                               | near_aggregation
@@ -45,10 +50,8 @@ grammar = '''
         group_field: search_id
         comparison_op: ">" | "<" | "="
         value: NUMBER
-
         NUMBER: /[1-9][0-9]*/
         NOT: "not"
-
         '''
 
 
@@ -150,8 +153,12 @@ def main():
     """
     Main function tests every event against every rule in the provided directory to generate a list of alerts
     (per event) for which rules have been hit on.
-     
+
     """
+    add_event = input('Enter event log to test (or \'done\'): ')
+    while add_event.lower() != 'done':
+        test_events.append(SCRIPT_LOCATION / Path(add_event))
+        add_event = input('Enter event log to test (or \'done\'): ')
 
     for e in test_events:
         global event
@@ -170,7 +177,8 @@ def main():
                 if 'timeframe' in rule_obj['detection']:
                     check_timeframe(rule_obj, rule_name, timed_events, event, alerts)
                 else:
-                    callback_buildReport(alerts, Alert(rule_name, get_description(rule_obj), event, get_level(rule_obj), get_yaml_name(rule_obj)))
+                    callback_buildReport(alerts, Alert(rule_name, get_description(rule_obj), event, get_level(rule_obj),
+                                                       get_yaml_name(rule_obj)))
 
         print('\033[4mAlerts\033[0m')
         print('Event: ' + e.name)

@@ -44,8 +44,6 @@ def check_pair(event, key, value):
                         flag = True
                     else:
                         flag = False
-                elif word == 'base64offset':
-                    return None
                 elif word == 'endswith':
                     if str(event[key]).endswith(str(value)):
                         flag = True
@@ -56,25 +54,7 @@ def check_pair(event, key, value):
                         flag = True
                     else:
                         flag = False
-                '''
-                elif word == 'utf16le' or word == 'wide':
-                    if str(event[key]) == str(encode(str(value), encoding='utf-16le')):
-                        flag = True
-                    else:
-                        flag = False
-                elif word == 'utf16be':
-                    if str(event[key]) == str(encode(str(value), encoding='utf-16be')):
-                        flag = True
-                    else:
-                        flag = False
-                elif word == 'utf16':
-                    str(value)
-                    new_value = str(encode(str(value), encoding='UTF-16'))
-                    if str(event[key]) == new_value:
-                        flag = True
-                    else:
-                        flag = False
-                '''
+
             return flag
 
         elif '*' in str(value):
