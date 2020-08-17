@@ -11,15 +11,7 @@ SCRIPT_LOCATION = Path(__file__).resolve().parent
 
 # Rules & events to be tested
 test_rules = SCRIPT_LOCATION / Path("test_rules")
-test_events = [SCRIPT_LOCATION / Path("test_a.xml"), SCRIPT_LOCATION / Path("test_b1.xml"),
-               SCRIPT_LOCATION / Path("test_b2.xml"), SCRIPT_LOCATION / Path("test_c.xml"),
-               SCRIPT_LOCATION / Path("test_d.xml"), SCRIPT_LOCATION / Path("test_e.xml"),
-               SCRIPT_LOCATION / Path("test_f.xml"), SCRIPT_LOCATION / Path("test_g.xml"),
-               SCRIPT_LOCATION / Path("test_h.xml"), SCRIPT_LOCATION / Path("test_i.xml"),
-               SCRIPT_LOCATION / Path("test_j.xml"), SCRIPT_LOCATION / Path("test_k.xml"),
-               SCRIPT_LOCATION / Path("test_l.xml"), SCRIPT_LOCATION / Path("test_m.xml"),
-               SCRIPT_LOCATION / Path("test_n.xml"), SCRIPT_LOCATION / Path("dllload1.xml"),
-               SCRIPT_LOCATION / Path("dllload2.xml"), SCRIPT_LOCATION / Path("modifier_test.xml")]
+test_events = []
 
 rules: Dict[str, Dict] = loadSignatures(test_rules)
 
@@ -159,6 +151,7 @@ def main():
     while add_event.lower() != 'done':
         test_events.append(SCRIPT_LOCATION / Path(add_event))
         add_event = input('Enter event log to test (or \'done\'): ')
+    print()
 
     for e in test_events:
         global event
