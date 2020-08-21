@@ -79,6 +79,6 @@ def prepareEventLog(event):
     :param event: single Sysmon event from log
     :return: dict, event dict
     """
-    
+
     flat = flattened(event)
     return convertEventDataToKeyValue(flat)

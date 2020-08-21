@@ -10,7 +10,7 @@ import re
 SCRIPT_LOCATION = Path(__file__).resolve().parent
 
 # Rules & events to be tested
-test_rules = SCRIPT_LOCATION / Path("rules1")
+test_rules = SCRIPT_LOCATION / Path("rules")
 test_events = []
 
 rules: Dict[str, Dict] = loadSignatures(test_rules)

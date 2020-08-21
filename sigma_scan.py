@@ -62,9 +62,9 @@ def check_pair(event, key, value):
 
         elif str(value) == '' or str(value) == 'null':
             try:
-                return str(event[key]) == ''
+                return str(event[key]) == '' or str(event[key]) == 'None'
             except:
-                return event[key] == ''
+                return event[key] == '' or str(event[key]) == None
 
         else:
             try:
