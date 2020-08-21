@@ -47,9 +47,10 @@ Event: test_a.xml
 ```
 The program takes in event logs as .xml files in a comma-separated list, and outputs a list for each event of any rules that were 'hit' and their corresponding alert levels (i.e. low, medium, high, critical).
 
-## How do I run it?
-
 ## Work in Progress
+* Handle multiple event logs within a single .xml file
+* Handle complete set of Value Modifiers under syntax specifications for Sigma rules
+* Handle Aggregation Expressions under syntax specifications for Sigma rules
  
 ## Credits
  Special thanks to the creators of Sigma and all of its contributors, starting with:
