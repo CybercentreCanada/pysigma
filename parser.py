@@ -11,7 +11,7 @@ SCRIPT_LOCATION = Path(__file__).resolve().parent
 
 # Rules & events to be tested
 test_rules = SCRIPT_LOCATION / Path("rules")
-test_events = []
+event_logfiles = []
 
 rules: Dict[str, Dict] = loadSignatures(test_rules)
 
@@ -141,42 +141,55 @@ class LogicTransformer(Transformer):
 parser = Lark(grammar, parser='lalr', transformer=LogicTransformer())
 
 
-def main():
+def check_event(e):
+    global event
+    event = prepareEventLog(e)
+
+    alerts = []
+
+    for rule_name, rule_obj in rules.items():
+        global rule
+        rule = rule_name
+        condition = get_condition(rule_obj, rule_name)
+        result = parser.parse(condition).pretty()
+
+        if 'True' in result:
+            if 'timeframe' in rule_obj['detection']:
+                check_timeframe(rule_obj, rule_name, timed_events, event, alerts)
+            else:
+                callback_buildReport(alerts,
+                                     Alert(rule_name, get_description(rule_obj), event, get_level(rule_obj),
+                                           get_yaml_name(rule_obj)))
+    return alerts
+
+
+def parse_logfiles(*logfiles):
     """
-    Main function tests every event against every rule in the provided directory to generate a list of alerts
-    (per event) for which rules have been hit on.
+    Main function tests every event against every rule in the provided list of files
+    :param logfiles: paths to each logfile
+    :return: dict of filename <-> event-alert tuples
 
     """
-    add_events = input('Enter event logs to test: ')
-    event_list = re.split(', ', add_events)
-    for evt in event_list:
-        test_events.append(SCRIPT_LOCATION / Path(evt))
+    for evt in logfiles:
+        event_logfiles.append(SCRIPT_LOCATION / Path(evt))
     print()
 
-    for e in test_events:
-        global event
-        event = load_events(e)
-        event = prepareEventLog(event)
+    file_event_alerts = {}
 
-        alerts = []
+    for f in event_logfiles:
+        log_dict = load_events(f)
+        try:
+            events = log_dict['Events']['Event']
+        except KeyError:
+            raise ValueError("The input file %s does not contain any events or is improperly formatted")
 
-        for rule_name, rule_obj in rules.items():
-            global rule
-            rule = rule_name
-            condition = get_condition(rule_obj, rule_name)
-            result = parser.parse(condition).pretty()
-
-            if 'True' in result:
-                if 'timeframe' in rule_obj['detection']:
-                    check_timeframe(rule_obj, rule_name, timed_events, event, alerts)
-                else:
-                    callback_buildReport(alerts, Alert(rule_name, get_description(rule_obj), event, get_level(rule_obj),
-                                                       get_yaml_name(rule_obj)))
-
-        print('\033[4mAlerts\033[0m')
-        print('Event: ' + e.name)
-        print(alerts)
-        print()
+        file_event_alerts[f.name] = []
 
 
-main()
+        for e in events:
+            alerts = check_event(e)
+            if len(alerts) > 0:
+                file_event_alerts[f.name].append((e, alerts))
+
+
+    return file_event_alerts
