@@ -179,17 +179,19 @@ def parse_logfiles(*logfiles):
     for f in event_logfiles:
         log_dict = load_events(f)
         try:
-            events = log_dict['Events']['Event']
+            # handle single event
+            if type(log_dict['Events']['Event']) is list:
+                events = log_dict['Events']['Event']
+            else:
+                events = [log_dict['Events']['Event']]
         except KeyError:
             raise ValueError("The input file %s does not contain any events or is improperly formatted")
 
         file_event_alerts[f.name] = []
 
-
         for e in events:
             alerts = check_event(e)
             if len(alerts) > 0:
                 file_event_alerts[f.name].append((e, alerts))
-
 
     return file_event_alerts
