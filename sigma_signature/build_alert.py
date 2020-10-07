@@ -39,7 +39,7 @@ def callback_buildReport(alert_list, alert):
     else:
         score = 'null'
 
-    alertItem = {alert.title: score}
+    alertItem = {"score": score, "yaml_name": alert.yaml_name}
     alert_list.append(alertItem)
 
 
