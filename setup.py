@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="sigma-signature",
-    version="0.0.1",
+    version="0.0.2",
     description="A library for parsing sysmon logs against sigma rules",
     long_description=long_description,
     long_description_content_type="text/markdown",
