@@ -5,7 +5,6 @@ from .WindowsEventLogsHelper import load_events, prepareEventLog
 from .build_alert import callback_buildReport, Alert, check_timeframe
 from .sigma_scan import analyze_x_of, analyze
 from .signatures import loadSignatures, get_condition, get_description, get_level, get_yaml_name
-import re
 
 SCRIPT_LOCATION = Path(__file__).resolve().parent
 
@@ -141,7 +140,7 @@ class LogicTransformer(Transformer):
 parser = Lark(grammar, parser='lalr', transformer=LogicTransformer())
 
 
-def check_event(e):
+def check_event(e, rules):
     global event
     event = prepareEventLog(e)
 
@@ -195,3 +194,5 @@ def parse_logfiles(*logfiles):
                 file_event_alerts[f.name].append((e, alerts))
 
     return file_event_alerts
+
+
