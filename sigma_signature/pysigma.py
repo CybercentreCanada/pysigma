@@ -1,3 +1,5 @@
+import xmltodict
+
 from . import signatures
 from . import parser
 
@@ -9,6 +11,9 @@ class PySigma:  # what should I name it?
 
     def add_signature(self, signature_file):
         name, signature = signatures.loadSignature(signature_file)
+        detection = signature['detection']
+        if 'near' in detection['condition']:
+            raise ValueError("near-aggregation is not supported")
         self.rules[name] = signature
         parser.rules = self.rules
 

@@ -60,7 +60,7 @@ def check_timeframe(rule_dict, rule_name, timed_events, event, alert_list):
     if timeframe.endswith('M'):
         time_limit = int(timeframe.strip('M')) * 30
     elif timeframe.endswith('d'):
-        time_limit = int(timeframe.strip('d'))
+        time_limit = int(timeframe.strip('d'))  # don't worry, days and months are handled below
     elif timeframe.endswith('h'):
         time_limit = int(timeframe.strip('h')) * 3600
     elif timeframe.endswith('m'):
