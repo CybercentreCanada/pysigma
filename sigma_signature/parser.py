@@ -12,7 +12,7 @@ SCRIPT_LOCATION = Path(__file__).resolve().parent
 test_rules = SCRIPT_LOCATION / Path("rules")
 event_logfiles = []
 
-rules: Dict[str, Dict] = loadSignatures(test_rules)
+rules: Dict[str, Dict] = {}
 
 event = None
 rule = None
