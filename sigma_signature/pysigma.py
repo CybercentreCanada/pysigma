@@ -2,7 +2,17 @@ import xmltodict
 
 from . import signatures
 from . import parser
-
+from yaml.composer import ComposerError
+def val_file(filename):
+    ps = PySigma()
+    with open(filename) as fh:
+        try:
+            ps.add_signature(fh)
+            return True
+        except ValueError:
+            return False
+        except ComposerError:
+            return False
 
 class PySigma:  # what should I name it?
     def __init__(self):
