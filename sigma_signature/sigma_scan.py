@@ -18,12 +18,13 @@ def check_pair(event, key, value):
     """
 
     if '|' in key:
-        modifiers = re.split('[|]', key)
+        modifiers = key.split('|')
         for word in modifiers:
             if word == '':
                 modifiers.remove(word)
         key = modifiers[0]
-        modifiers.remove(modifiers[0])
+        modifiers = modifiers[1:]
+        #modifiers.remove(modifiers[0])
 
     else:
         modifiers = []

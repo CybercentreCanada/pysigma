@@ -137,7 +137,7 @@ class LogicTransformer(Transformer):
 
 
 # Create & initialize Lark class instance
-parser = Lark(grammar, parser='lalr', transformer=LogicTransformer())
+parser = Lark(grammar, parser='lalr', transformer=LogicTransformer(), cache=True)
 
 
 def check_event(e, rules):
@@ -148,6 +148,7 @@ def check_event(e, rules):
 
     for rule_name, rule_obj in rules.items():
         global rule
+
         rule = rule_name
         condition = get_condition(rule_obj, rule_name)
         result = parser.parse(condition).pretty()

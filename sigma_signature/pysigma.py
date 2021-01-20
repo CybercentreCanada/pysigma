@@ -29,14 +29,15 @@ class PySigma:  # what should I name it?
         self.rules[name] = signature
         parser.rules = self.rules
 
-    def check_event(self, event):
-        alerts = parser.check_event(event, rules=self.rules)
-        if self.callback:
-            for a in alerts:
-                self.callback(a, event)
-        else:
-            raise ValueError("There's no callback")
-        pass
+    def check_events(self, events):
+        for event in events:
+            alerts = parser.check_event(event, rules=self.rules)
+            if self.callback:
+                for a in alerts:
+                    self.callback(a, event)
+            else:
+                raise ValueError("There's no callback")
+            pass
 
     def register_callback(self, c):
         self.callback = c
@@ -52,10 +53,8 @@ class PySigma:  # what should I name it?
                 events = [log_dict['Events']['Event']]
         except KeyError:
             raise ValueError("The input file %s does not contain any events or is improperly formatted")
-
         return events
 
     def check_logfile(self, logfile_path):
         events = self.build_sysmon_events(logfile_path)
-        for e in events:
-            self.check_event(e)
+        self.check_events(events)
