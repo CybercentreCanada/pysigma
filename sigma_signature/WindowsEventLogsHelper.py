@@ -1,9 +1,9 @@
 from xml.parsers.expat import ExpatError
 from io import open
+from evtx import PyEvtxParser
 
 import collections
-import xmltodict
-
+import json
 
 def load_events(xmlLog):
     """
@@ -14,7 +14,15 @@ def load_events(xmlLog):
     """
     try:
         with open(xmlLog, "r", encoding='utf-8', errors='ignore') as fp:
-            return xmltodict.parse(fp.read())
+            magic = fp.read(7)
+            fp.seek(0)
+            if magic == 'ElfFile':
+                # log is evtx type
+                parser = PyEvtxParser(xmlLog)
+                dictrecords = [json.loads(rec['data']) for rec in parser.records_json()]
+                return dictrecords
+            else:
+                raise Exception('Only EVTX supported')
     except ExpatError:
         raise KeyError("Error: Format error in the Event log file")
 
@@ -36,41 +44,6 @@ def flattened(event):
     return dict(items)
 
 
-def convertEventDataToKeyValue(event_dict):
-    """
-    Convert event's data to as key value pair
-    Example:
-        "@Name": "UtcTime", "#text": "2018-08-21 03:09:31.314" to UtcTime: 2018-08-21 03:09:31.314
-
-    :param event_dict: event
-    :return: k,v Data section
-    """
-
-    tempdict = {}
-    data = event_dict['Data']
-    event_dict.update({'StartModule': None})
-
-    for item in data:
-        key = 0
-        value = 0
-        for k, v in item.items():
-            if k == '#text':
-                value = v
-            elif k == '@Name':
-                key = v
-            else:
-                print("Error in Data Section: Formatting")
-                break
-            if (key != 0) and (value != 0):
-                tempdict.update({key: value})
-
-    del event_dict['Data']
-
-    for k, v in tempdict.items():
-        event_dict.update({k: v})
-    return event_dict
-
-
 def prepareEventLog(event):
     """
     Prepares event log for use and info extraction. Flattens event log, and converts event
@@ -81,4 +54,4 @@ def prepareEventLog(event):
     """
 
     flat = flattened(event)
-    return convertEventDataToKeyValue(flat)
+    return flat
