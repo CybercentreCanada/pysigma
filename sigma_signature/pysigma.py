@@ -1,5 +1,3 @@
-import xmltodict
-
 from . import signatures
 from . import parser
 from yaml.composer import ComposerError
