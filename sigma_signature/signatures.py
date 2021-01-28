@@ -17,28 +17,38 @@ def loadSignatures(signatureDir):
             dirfile = os.path.join(signatureDir, files)
             if os.path.isfile(dirfile):
                 with open(dirfile, 'r') as yaml_in:
-                    loadyaml = yaml.safe_load_all(yaml_in)
-                    for item in loadyaml:
-                        tempdict = {}
-                        tempdict['yaml_name'] = dirfile.split('/')[-1]
-                        if isinstance(item, dict):
-                            for k, v in item.items():
-                                if k == 'title':
-                                    tempkey = v
-                                elif k == 'detection':
-                                    v = escape_compatible(v)
-                                    tempdict[k] = v
-                                elif k == 'description':
-                                    tempdict[k] = v
-                                elif k == 'status':
-                                    tempdict[k] = v
-                                elif k == 'level':
-                                    tempdict[k] = v
-                            newdict[tempkey] = tempdict
+                    name, signature = loadSignature(yaml_in)
+                    newdict[name] = signature
         return newdict
 
     except Exception as e:
         raise KeyError("Error in Formatting of Rules: Verify your YAML documents")
+
+def loadSignature(signature_file):
+    """
+    Load a single sigma signature from a file object
+
+    :param signature_file: a file like object containing sigma yaml
+    :return: a tuple containing the name and a signature represented as a dictionary
+    """
+    yaml_data = yaml.safe_load_all(signature_file)
+    for item in yaml_data:
+        tempdict = {}
+        tempdict['yaml_name'] = signature_file.name.split('/')[-1]
+        if isinstance(item, dict):
+            for k, v in item.items():
+                if k == 'title':
+                    tempkey = v
+                elif k == 'detection':
+                    v = escape_compatible(v)
+                    tempdict[k] = v
+                elif k == 'description':
+                    tempdict[k] = v
+                elif k == 'status':
+                    tempdict[k] = v
+                elif k == 'level':
+                    tempdict[k] = v
+            return (tempkey, tempdict) # name, signature
 
 
 def escape_compatible(detect):
