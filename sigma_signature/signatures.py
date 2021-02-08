@@ -33,22 +33,10 @@ def loadSignature(signature_file):
     """
     yaml_data = yaml.safe_load_all(signature_file)
     for item in yaml_data:
-        tempdict = {}
-        tempdict['yaml_name'] = signature_file.name.split('/')[-1]
         if isinstance(item, dict):
-            for k, v in item.items():
-                if k == 'title':
-                    tempkey = v
-                elif k == 'detection':
-                    v = escape_compatible(v)
-                    tempdict[k] = v
-                elif k == 'description':
-                    tempdict[k] = v
-                elif k == 'status':
-                    tempdict[k] = v
-                elif k == 'level':
-                    tempdict[k] = v
-            return (tempkey, tempdict) # name, signature
+            subset_dict = {k: item[k] for k in ('detection', 'description', 'status', 'level', 'tags')}
+            return (item['title'], subset_dict)
+
 
 
 def escape_compatible(detect):
