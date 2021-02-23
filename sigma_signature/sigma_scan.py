@@ -24,7 +24,6 @@ def check_pair(event, key, value):
                 modifiers.remove(word)
         key = modifiers[0]
         modifiers = modifiers[1:]
-        #modifiers.remove(modifiers[0])
 
     else:
         modifiers = []
@@ -59,6 +58,9 @@ def check_pair(event, key, value):
             return flag
 
         elif '*' in str(value):
+            if isinstance(value, list):
+                flags = [ fnmatch.fnmatch(event[key], pattern) for pattern in value ]
+                return True if True in flags else False
             return fnmatch.fnmatch(event[key], value)
 
         elif str(value) == '' or str(value) == 'null':
@@ -157,6 +159,21 @@ def find_all_matches(event, rule_dict):
                             matches.append(True)
     return matches
 
+def analyze_condition(event, rule_dict, condition, rule_name):
+    indicators = re.split('[(]|[)]| of |not| and | or |[|]', condition)
+    for word in indicators:
+        if word == '':
+            indicators.remove(word)
+    matches = {}
+
+    for word in indicators:
+        word = word.strip()
+        if word in rule_dict['detection']:
+            if find_matches(event, get_data(rule_dict, word)) and str(rule_name):
+                matches[word] = True
+            else:
+                matches[word] = False
+    return matches
 
 def analyze(event, rule_name, rule_dict):
     """
@@ -169,23 +186,16 @@ def analyze(event, rule_name, rule_dict):
     """
 
     condition = get_condition(rule_dict, rule_name)
+    if isinstance(condition, list):
+        list_matches = [analyze_condition(event, rule_dict, c, rule_name) for c in condition]
+        return list_matches
 
-    indicators = re.split('[(]|[)]| of |not| and | or |[|]', condition)
-    for word in indicators:
-        if word == '':
-            indicators.remove(word)
+    if isinstance(condition, str):
+        matches = analyze_condition(event, rule_dict, condition, rule_name)
+        return [matches]
 
-    matches = {}
 
-    for word in indicators:
-        word = word.strip()
-        if word in rule_dict['detection']:
-            if find_matches(event, get_data(rule_dict, word)) and str(rule_name):
-                matches[word] = True
-            else:
-                matches[word] = False
 
-    return matches
 
 
 def analyze_x_of(event, rule_name, rule_dict):

@@ -56,8 +56,11 @@ class LogicTransformer(Transformer):
     def identifier_rule(self, args):
         # Call analyze on all rules in the rule directory to find matches for each event
         hits = analyze(event, str(rule), rules[rule])
-        if args in hits:
-            return hits[args]
+        for pair in hits:
+            if args in pair:
+                return pair[args]
+
+
 
     def atom_rule(self, args):
         if isinstance(args, list):
@@ -135,11 +138,30 @@ class LogicTransformer(Transformer):
             return analyze_x_of(event, str(rule), rules[rule])
         return None
 
+EVENT_MAPPING = {
+    "process_creation":1,
 
+}
 # Create & initialize Lark class instance
-parser = Lark(grammar, parser='lalr', transformer=LogicTransformer(), cache=True)
+parser = Lark(grammar, parser='lalr', transformer=LogicTransformer())
 
+def check_eventid(ev, rule):
 
+    id = ev['EventID']
+    try:
+        category = rule['logsource']['category']
+    except KeyError as e:
+        return False
+
+    category_to_id = EVENT_MAPPING.get(category)
+    if isinstance(id, list):
+        for i in id:
+            if category_to_id == i:
+                return True
+    if isinstance(id, int):
+        if category_to_id == id:
+            return True
+    return False
 def check_event(e, rules):
     global event
     event = prepareEventLog(e)
@@ -151,7 +173,24 @@ def check_event(e, rules):
 
         rule = rule_name
         condition = get_condition(rule_obj, rule_name)
-        result = parser.parse(condition).pretty()
+
+        match = check_eventid(event, rule_obj)
+        if not match:
+            # skip this rule because eventid doesn't match this rule
+            continue
+        if isinstance(condition, str):
+            result = parser.parse(condition).pretty()
+        if isinstance(condition, list):
+            for c in condition:
+                result = parser.parse(c).pretty()
+                if 'True' in result:
+                    if 'timeframe' in rule_obj['detection']:
+                        check_timeframe(rule_obj, rule_name, timed_events, event, alerts)
+                    else:
+                        callback_buildReport(alerts,
+                                             Alert(rule_name, get_description(rule_obj), event, get_level(rule_obj),
+                                                   rule_name))
+                    continue
 
         if 'True' in result:
             if 'timeframe' in rule_obj['detection']:
