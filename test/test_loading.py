@@ -4,17 +4,17 @@ import urllib.request
 
 import pytest
 
-import sigma_signature.pysigma
+import pysigma
 
 
-test_dir = os.path.dirname(__file__)
+project_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 
 @pytest.fixture
 def upstream_rules():
     url = 'https://github.com/Neo23x0/sigma/archive/master.zip'
-    zip_path = os.path.join(test_dir, 'neo-sigma-master.zip')
-    zip_dir = os.path.join(test_dir, 'neo-sigma-master')
+    zip_path = os.path.join(project_dir, 'neo-sigma-master.zip')
+    zip_dir = os.path.join(project_dir, 'neo-sigma-master')
     try:
         if not os.path.exists(zip_path):
             urllib.request.urlretrieve(url, zip_path)
@@ -28,12 +28,19 @@ def upstream_rules():
 
 
 def test_load_sample_rules(upstream_rules):
-    processor = sigma_signature.pysigma.PySigma()
-    for file_name in os.listdir(upstream_rules):
-        if not file_name.endswith('.yml'):
-            continue
+    processor = pysigma.PySigma()
+    for dir_path, _, files_in_dir in os.walk(upstream_rules):
+        for file_name in files_in_dir:
+            if not file_name.endswith('.yml'):
+                continue
 
-        with open(os.path.join(upstream_rules, file_name)) as handle:
-            processor.add_signature(handle)
-
+            try:
+                with open(os.path.join(dir_path, file_name)) as handle:
+                    processor.add_signature(handle)
+            except pysigma.UnsupportedFeature:
+                pass
+            except Exception:
+                print("failed on ", dir_path, file_name)
+                raise
+    assert len(processor.rules) > 1
 

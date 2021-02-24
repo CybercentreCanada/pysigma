@@ -5,6 +5,11 @@ import logging
 logger = logging.getLogger('pysigma')
 logger.setLevel(logging.INFO)
 
+
+class UnsupportedFeature(RuntimeError):
+    pass
+
+
 def val_file(filename):
     ps = PySigma()
     with open(filename) as fh:
@@ -20,7 +25,8 @@ def val_file(filename):
             logger.error(e)
             return False
 
-class PySigma:  # what should I name it?
+
+class PySigma:
     def __init__(self):
         self.rules = {}
         self.callback = None
@@ -28,10 +34,13 @@ class PySigma:  # what should I name it?
     def add_signature(self, signature_file):
         name, signature = signatures.loadSignature(signature_file)
         detection = signature.get('detection')
+
         if not detection:
             raise ValueError("No detection key in signature")
+
         if 'near' in detection['condition']:
-            raise ValueError("near-aggregation is not supported")
+            raise UnsupportedFeature("near-aggregation is not supported")
+
         self.rules[name] = signature
         parser.rules = self.rules
 
@@ -51,8 +60,6 @@ class PySigma:  # what should I name it?
 
     def register_callback(self, c):
         self.callback = c
-
-
 
     @staticmethod
     def build_sysmon_events(logfile_path):

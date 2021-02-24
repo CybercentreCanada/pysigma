@@ -24,6 +24,7 @@ def loadSignatures(signatureDir):
     except Exception as e:
         raise KeyError("Error in Formatting of Rules: Verify your YAML documents")
 
+
 def loadSignature(signature_file):
     """
     Load a single sigma signature from a file object
@@ -38,8 +39,8 @@ def loadSignature(signature_file):
             mandatory_fields = ['detection', 'logsource']
             for field in mandatory_fields:
                 if not subset_dict[field]:
-                    raise KeyError(f"WARNING:{field} not found in YAML")
-            return (item['title'], subset_dict)
+                    raise KeyError(f"Required field '{field}' not found in rule.")
+            return item['title'], subset_dict
 
 
 def escape_compatible(detect):
