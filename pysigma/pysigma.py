@@ -32,16 +32,12 @@ class PySigma:
         self.callback = None
 
     def add_signature(self, signature_file):
-        name, signature = signatures.loadSignature(signature_file)
-        detection = signature.get('detection')
+        signature = signatures.load_signature(signature_file)
+        for detection in signature.detections:
+            if 'near' in detection.detection.get('condition', ''):
+                raise UnsupportedFeature("near-aggregation is not supported")
 
-        if not detection:
-            raise ValueError("No detection key in signature")
-
-        if 'near' in detection['condition']:
-            raise UnsupportedFeature("near-aggregation is not supported")
-
-        self.rules[name] = signature
+        self.rules[signature.title] = signature
         parser.rules = self.rules
 
     def check_events(self, events):

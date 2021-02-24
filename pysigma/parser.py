@@ -4,7 +4,7 @@ from pathlib import Path
 from .WindowsEventLogsHelper import load_events, prepareEventLog
 from .build_alert import callback_buildReport, Alert, check_timeframe
 from .sigma_scan import analyze, analyze_x_of
-from .signatures import loadSignatures, get_condition, get_description, get_level, get_yaml_name
+from .signatures import get_condition, get_description, get_level
 
 SCRIPT_LOCATION = Path(__file__).resolve().parent
 

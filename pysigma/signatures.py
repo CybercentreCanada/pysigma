@@ -1,50 +1,82 @@
 import os
-import yaml
+from typing import Dict, List
 import re
 
+import yaml
 
-def loadSignatures(signatureDir):
+
+class SignatureLoadError(KeyError):
+    pass
+
+
+class Detection:
+    def __init__(self, data):
+        self.detection = data['detection']
+        self.logsource = data.get('logsource')
+
+
+class Signature:
+    def __init__(self, data: List[Dict]):
+        self.title = None
+        self.description = None
+        self.level = None
+        self.tags = None
+        self.detections = []
+
+        for segment in data:
+            if 'title' in segment:
+                self.title = segment['title']
+            if 'description' in segment:
+                self.description = segment['description']
+            if 'level' in segment:
+                self.level = segment['level']
+            if 'tags' in segment:
+                self.tags = segment['tags']
+            if 'detection' in segment:
+                self.detections.append(Detection(segment))
+
+        if self.title is None:
+            raise SignatureLoadError('title')
+        if not self.detections:
+            raise SignatureLoadError('detection')
+
+
+def load_signatures(signature_dir) -> Dict[str, Signature]:
     """
     Load all Sigma signatures from a directory
 
-    :param signatureDir: Directory which contains all Sigma signature to load
+    :param signature_dir: Directory which contains all Sigma signature to load
     :return: A dictionary containing all loaded signatures
     """
 
     try:
         newdict = {}
-        for files in os.listdir(signatureDir):
-            dirfile = os.path.join(signatureDir, files)
+        for files in os.listdir(signature_dir):
+            dirfile = os.path.join(signature_dir, files)
             if os.path.isfile(dirfile):
                 with open(dirfile, 'r') as yaml_in:
-                    name, signature = loadSignature(yaml_in)
+                    name, signature = load_signature(yaml_in)
                     newdict[name] = signature
         return newdict
 
-    except Exception as e:
+    except Exception:
         raise KeyError("Error in Formatting of Rules: Verify your YAML documents")
 
 
-def loadSignature(signature_file):
+def load_signature(signature_file) -> Signature:
     """
     Load a single sigma signature from a file object
 
+    TODO introduce caching at this layer?
+
     :param signature_file: a file like object containing sigma yaml
-    :return: a tuple containing the name and a signature represented as a dictionary
+    :return: Signature object
     """
-    yaml_data = yaml.safe_load_all(signature_file)
-    for item in yaml_data:
-        if isinstance(item, dict):
-            subset_dict = {k: item.get(k) for k in ('detection', 'description',  'level', 'tags', 'logsource')}
-            mandatory_fields = ['detection', 'logsource']
-            for field in mandatory_fields:
-                if not subset_dict[field]:
-                    raise KeyError(f"Required field '{field}' not found in rule.")
-            return item['title'], subset_dict
+    return Signature(list(yaml.safe_load_all(signature_file)))
 
 
 def escape_compatible(detect):
-    """
+    r"""
     Looks through a yaml signature detection section and replaces all escape characters with just the characters to be
     compatible ( i.e. \\ --> \ )
 
@@ -166,7 +198,7 @@ def get_condition(rule_dict, condition):
         return "none"
     except AttributeError:
         # If condition is a list
-        return ([ condition.lower() for condition in rule_dict['detection']['condition']])
+        return [condition.lower() for condition in rule_dict['detection']['condition']]
 
 
 def get_data(rule_dict, key):

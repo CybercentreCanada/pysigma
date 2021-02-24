@@ -1,6 +1,7 @@
 import os.path
 import shutil
 import urllib.request
+import traceback
 
 import pytest
 
@@ -43,9 +44,10 @@ def test_load_sample_rules(upstream_rules):
                 unsupported += 1
             except Exception:
                 print("failed on ", dir_path, file_name)
+                traceback.print_exc()
                 failed += 1
+
     print('unsupported', unsupported)
-    print('failed', failed)
-    print('loaded', len(processor.rules))
+    assert failed == 0
     assert len(processor.rules) > 600
 
