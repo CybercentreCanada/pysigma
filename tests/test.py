@@ -16,9 +16,15 @@ def test_init():
     assert sigma_parser.rules == {}
     assert sigma_parser.callback == None
 
+
+def test_add_signature(sigma_parser):
+    signatures = load_rule()
+    for signature_name, signature in signatures.items():
+        sigma_parser.add_signature(signature)
+    assert sample_rule.items() <= sigma_parser.rules.items()
+
+
 def load_rule():
-    print('\nhello\n\n')
-    print(os.listdir(RULE_DIR))
     rules = os.listdir(RULE_DIR)
     dict_rules = {}
     for rule in rules:
@@ -27,11 +33,11 @@ def load_rule():
             dict_rules[rule] = content
     return dict_rules
 
+
 def add_signature(sigma_parser):
     signatures = load_rule()
     for signature_name, signature in signatures.items():
         sigma_parser.add_signature(signature)
-    assert sample_rule.items() <= sigma_parser.rules.items()
     return sigma_parser
 
 
@@ -49,14 +55,10 @@ def build_sysmon_events():
 
 
 def check_events(self, events):
-    forbidden_rules = ['RDP over Reverse SSH Tunnel WFP', 'Suspicious Execution from Outlook']
-    for r in forbidden_rules:
-        if r in self.rules:
-            del self.rules[r]
     for event in events:
         alerts = parser.check_event(event, rules=self.rules)
         if alerts:
-            print(alerts)
+            print('alerts ',alerts)
 
 @pytest.fixture
 def sigma_parser():
