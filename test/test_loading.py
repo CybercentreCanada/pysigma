@@ -29,6 +29,8 @@ def upstream_rules():
 
 def test_load_sample_rules(upstream_rules):
     processor = pysigma.PySigma()
+    unsupported = 0
+    failed = 0
     for dir_path, _, files_in_dir in os.walk(upstream_rules):
         for file_name in files_in_dir:
             if not file_name.endswith('.yml'):
@@ -38,9 +40,12 @@ def test_load_sample_rules(upstream_rules):
                 with open(os.path.join(dir_path, file_name)) as handle:
                     processor.add_signature(handle)
             except pysigma.UnsupportedFeature:
-                pass
+                unsupported += 1
             except Exception:
                 print("failed on ", dir_path, file_name)
-                raise
-    assert len(processor.rules) > 1
+                failed += 1
+    print('unsupported', unsupported)
+    print('failed', failed)
+    print('loaded', len(processor.rules))
+    assert len(processor.rules) > 600
 
