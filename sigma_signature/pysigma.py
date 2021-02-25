@@ -36,10 +36,6 @@ class PySigma:  # what should I name it?
         parser.rules = self.rules
 
     def check_events(self, events):
-        forbidden_rules = ['RDP over Reverse SSH Tunnel WFP', 'Suspicious Execution from Outlook']
-        for r in forbidden_rules:
-            if r in self.rules:
-                del self.rules[r]
         for event in events:
             alerts = parser.check_event(event, rules=self.rules)
             if self.callback:
