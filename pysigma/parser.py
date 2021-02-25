@@ -1,10 +1,13 @@
 from typing import Dict, Callable
-from lark import Lark, Transformer
 from pathlib import Path
-from .WindowsEventLogsHelper import load_events, prepareEventLog
+
+from .WindowsEventLogsHelper import prepareEventLog
 from .build_alert import callback_buildReport, Alert, check_timeframe
 from .exceptions import UnsupportedFeature
-from .sigma_scan import analyze, analyze_x_of, match_search_id
+from .sigma_scan import analyze_x_of, match_search_id
+
+from lark import Lark, Transformer
+
 
 SCRIPT_LOCATION = Path(__file__).resolve().parent
 

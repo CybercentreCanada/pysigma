@@ -14,7 +14,6 @@ class Alert:
         self.level = level
 
 
-
 def callback_buildReport(alert_list, alert):
     """
     Creates result entry with alert object, and provides a score relative to the rule level
