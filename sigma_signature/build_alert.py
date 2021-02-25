@@ -13,7 +13,7 @@ class Alert:
         self.description = description
         self.event = event
         self.level = level
-        self.yaml_name = yaml_name
+
 
 
 def callback_buildReport(alert_list, alert):
@@ -39,7 +39,7 @@ def callback_buildReport(alert_list, alert):
     else:
         score = 'null'
 
-    alertItem = {"score": score, "yaml_name": alert.yaml_name, "title": alert.title}
+    alertItem = {"score": score, "title": alert.title}
     alert_list.append(alertItem)
 
 
