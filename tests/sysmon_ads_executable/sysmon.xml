@@ -233,4 +233,64 @@
 			<Data Name="ParentCommandLine">C:\windows\system32\appidpolicyconverter.exe</Data>
 		</EventData>
 	</Event>
+		</Event>
+	<Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
+		<System>
+			<Provider Guid="{5770385f-c22a-43e0-bf4c-06f5698ffbd9}" Name="Microsoft-Windows-Sysmon"/>
+			<EventID>17</EventID>
+			<Version>3</Version>
+			<Level>4</Level>
+			<Task>10</Task>
+			<Opcode>0</Opcode>
+			<Keywords>0x8000000000000000</Keywords>
+			<TimeCreated SystemTime="2021-01-25T14:25:34.932740300Z"/>
+			<EventRecordID>3</EventRecordID>
+			<Correlation/>
+			<Execution ProcessID="5096" ThreadID="1436"/>
+			<Channel>Microsoft-Windows-Sysmon/Operational</Channel>
+			<Computer>buddy-pc</Computer>
+			<Security UserID="S-1-5-18"/>
+		</System>
+		<EventData>
+			<Data Name="RuleName"/>
+			<Data Name="UtcTime">2021-01-25 14:25:34.897</Data>
+			<Data Name="SourceProcessGUID">{d16cb8c4-d473-600e-0000-0010317f0000}</Data>
+			<Data Name="SourceProcessId">948</Data>
+			<Data Name="SourceThreadId">2100</Data>
+			<Data Name="SourceImage">C:\windows\system32\svchost.exe</Data>
+			<Data Name="TargetProcessGUID">{d16cb8c4-d476-600e-0000-00104fd80100}</Data>
+			<Data Name="TargetProcessId">3188</Data>
+			<Data Name="TargetImage">C:\windows\system32\svchost.exe</Data>
+			<Data Name="GrantedAccess">0x1000</Data>
+			<Data Name="CallTrace">C:\windows\SYSTEM32\ntdll.dll+9fc14|C:\windows\SYSTEM32\psmserviceexthost.dll+12b34|C:\windows\SYSTEM32\psmserviceexthost.dll+129af|C:\windows\SYSTEM32\psmserviceexthost.dll+1265e|C:\windows\SYSTEM32\psmserviceexthost.dll+11e83|C:\windows\SYSTEM32\ntdll.dll+64da0|C:\windows\SYSTEM32\ntdll.dll+505c4|C:\windows\System32\KERNEL32.DLL+17974|C:\windows\SYSTEM32\ntdll.dll+6a261</Data>
+		</EventData>
+	</Event>
+		</Event>
+	<Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
+		<System>
+			<Provider Guid="{5770385f-c22a-43e0-bf4c-06f5698ffbd9}" Name="Microsoft-Windows-Sysmon"/>
+			<EventID>17</EventID>
+			<Version>1</Version>
+			<Level>4</Level>
+			<Task>17</Task>
+			<Opcode>0</Opcode>
+			<Keywords>0x8000000000000000</Keywords>
+			<TimeCreated SystemTime="2021-01-25T14:25:34.933689100Z"/>
+			<EventRecordID>20</EventRecordID>
+			<Correlation/>
+			<Execution ProcessID="5096" ThreadID="1436"/>
+			<Channel>Microsoft-Windows-Sysmon/Operational</Channel>
+			<Computer>buddy-pc</Computer>
+			<Security UserID="S-1-5-18"/>
+		</System>
+		<EventData>
+			<Data Name="RuleName"/>
+			<Data Name="EventType">CreatePipe</Data>
+			<Data Name="UtcTime">2021-01-25 14:25:34.912</Data>
+			<Data Name="ProcessGuid">{d16cb8c4-d476-600e-0000-00104fd80100}</Data>
+			<Data Name="ProcessId">3188</Data>
+			<Data Name="PipeName">\PSHost_EVENTROOT\CIMV2SCM EVENT PROVIDER</Data>
+			<Data Name="Image">C:\windows\system32\powershell.exe</Data>
+		</EventData>
+	</Event>
 </Events>

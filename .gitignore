@@ -19,3 +19,6 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+neo-sigma-master.zip
+neo-sigma-master/
+

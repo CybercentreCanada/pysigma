@@ -2,7 +2,7 @@
 	<Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
 		<System>
 			<Provider Guid="{5770385F-C22A-43E0-BF4C-06F5698FFBD9}" Name="Microsoft-Windows-Sysmon"/>
-			<EventID>15</EventID>
+			<EventID>16</EventID>
 			<Version>3</Version>
 			<Level>4</Level>
 			<Task>16</Task>
@@ -163,37 +163,6 @@
 	<Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
 		<System>
 			<Provider Guid="{5770385f-c22a-43e0-bf4c-06f5698ffbd9}" Name="Microsoft-Windows-Sysmon"/>
-			<EventID>10</EventID>
-			<Version>3</Version>
-			<Level>4</Level>
-			<Task>10</Task>
-			<Opcode>0</Opcode>
-			<Keywords>0x8000000000000000</Keywords>
-			<TimeCreated SystemTime="2021-01-25T14:25:49.561051200Z"/>
-			<EventRecordID>253</EventRecordID>
-			<Correlation/>
-			<Execution ProcessID="5096" ThreadID="1436"/>
-			<Channel>Microsoft-Windows-Sysmon/Operational</Channel>
-			<Computer>buddy-pc</Computer>
-			<Security UserID="S-1-5-18"/>
-		</System>
-		<EventData>
-			<Data Name="RuleName"/>
-			<Data Name="UtcTime">2021-01-25 14:25:49.558</Data>
-			<Data Name="SourceProcessGUID">{d16cb8c4-d472-600e-0000-001067610000}</Data>
-			<Data Name="SourceProcessId">560</Data>
-			<Data Name="SourceThreadId">732</Data>
-			<Data Name="SourceImage">C:\windows\system32\csrss.exe</Data>
-			<Data Name="TargetProcessGUID">{d16cb8c4-d4ed-600e-0000-00108c981e00}</Data>
-			<Data Name="TargetProcessId">6824</Data>
-			<Data Name="TargetImage">C:\windows\system32\conhost.exe</Data>
-			<Data Name="GrantedAccess">0x1fffff</Data>
-			<Data Name="CallTrace">C:\windows\SYSTEM32\ntdll.dll+a07e4|C:\windows\SYSTEM32\CSRSRV.dll+1c00|C:\windows\SYSTEM32\CSRSRV.dll+631a|C:\windows\SYSTEM32\ntdll.dll+6a26f</Data>
-		</EventData>
-	</Event>
-    	<Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
-		<System>
-			<Provider Guid="{5770385f-c22a-43e0-bf4c-06f5698ffbd9}" Name="Microsoft-Windows-Sysmon"/>
 			<EventID>1</EventID>
 			<Version>5</Version>
 			<Level>4</Level>
@@ -231,6 +200,187 @@
 			<Data Name="ParentProcessId">3216</Data>
 			<Data Name="ParentImage">C:\Windows\System32\appidpolicyconverter.exe</Data>
 			<Data Name="ParentCommandLine">C:\windows\system32\appidpolicyconverter.exe</Data>
+		</EventData>
+	</Event>
+	<Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
+		<System>
+			<Provider Guid="{5770385f-c22a-43e0-bf4c-06f5698ffbd9}" Name="Microsoft-Windows-Sysmon"/>
+			<EventID>10</EventID>
+			<Version>3</Version>
+			<Level>4</Level>
+			<Task>10</Task>
+			<Opcode>0</Opcode>
+			<Keywords>0x8000000000000000</Keywords>
+			<TimeCreated SystemTime="2021-01-25T14:25:49.561051200Z"/>
+			<EventRecordID>253</EventRecordID>
+			<Correlation/>
+			<Execution ProcessID="5096" ThreadID="1436"/>
+			<Channel>Microsoft-Windows-Sysmon/Operational</Channel>
+			<Computer>buddy-pc</Computer>
+			<Security UserID="S-1-5-18"/>
+		</System>
+		<EventData>
+			<Data Name="RuleName"/>
+			<Data Name="UtcTime">2021-01-25 14:25:49.558</Data>
+			<Data Name="SourceProcessGUID">{d16cb8c4-d472-600e-0000-001067610000}</Data>
+			<Data Name="SourceProcessId">560</Data>
+			<Data Name="SourceThreadId">732</Data>
+			<Data Name="SourceImage">C:\windows\system32\csrss.exe</Data>
+			<Data Name="TargetProcessGUID">{d16cb8c4-d4ed-600e-0000-00108c981e00}</Data>
+			<Data Name="TargetProcessId">6824</Data>
+			<Data Name="TargetImage">C:\windows\system32\conhost.exe</Data>
+			<Data Name="GrantedAccess">0x1fffff</Data>
+			<Data Name="CallTrace">C:\windows\SYSTEM32\ntdll.dll+a07e4|C:\windows\SYSTEM32\CSRSRV.dll+1c00|C:\windows\SYSTEM32\CSRSRV.dll+631a|C:\windows\SYSTEM32\ntdll.dll+6a26f</Data>
+		</EventData>
+	</Event>
+	<Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
+		<System>
+			<Provider Guid="{5770385F-C22A-43E0-BF4C-06F5698FFBD9}" Name="Microsoft-Windows-Sysmon"/>
+			<EventID>8</EventID>
+			<Version>2</Version>
+			<Level>4</Level>
+			<Task>8</Task>
+			<Opcode>0</Opcode>
+			<Keywords>0x8000000000000000</Keywords>
+			<TimeCreated SystemTime="2020-11-04T18:42:01.946875000Z"/>
+			<EventRecordID>59897</EventRecordID>
+			<Correlation/>
+			<Execution ProcessID="1676" ThreadID="2512"/>
+			<Channel>Microsoft-Windows-Sysmon/Operational</Channel>
+			<Computer>buddy-pc-win7</Computer>
+			<Security UserID="S-1-5-18"/>
+		</System>
+		<EventData>
+			<Data Name="RuleName"/>
+			<Data Name="UtcTime">2020-11-04 18:42:01.946</Data>
+			<Data Name="SourceProcessGuid">{EBC3FDE9-F5C9-5FA2-0000-0010D4050100}</Data>
+			<Data Name="SourceProcessId">992</Data>
+			<Data Name="SourceImage">C:\Windows\System32\svchost.exe</Data>
+			<Data Name="TargetProcessGuid">{EBC3FDE9-F5F9-5FA2-0000-001018F60800}</Data>
+			<Data Name="TargetProcessId">0B80</Data>
+			<Data Name="TargetImage">C:\Windows\System32\winlogon.exe</Data>
+			<Data Name="NewThreadId">3520</Data>
+			<Data Name="StartAddress">0x000007FF25273DC0</Data>
+			<Data Name="StartModule">C:\windows\system32\UXINIT.dll</Data>
+			<Data Name="StartFunction"/>
+		</EventData>
+	</Event>
+	<Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
+		<System>
+			<Provider Guid="{5770385f-c22a-43e0-bf4c-06f5698ffbd9}" Name="Microsoft-Windows-Sysmon"/>
+			<EventID>17</EventID>
+			<Version>1</Version>
+			<Level>4</Level>
+			<Task>17</Task>
+			<Opcode>0</Opcode>
+			<Keywords>0x8000000000000000</Keywords>
+			<TimeCreated SystemTime="2021-01-25T14:25:36.688627500Z"/>
+			<EventRecordID>85</EventRecordID>
+			<Correlation/>
+			<Execution ProcessID="5096" ThreadID="1436"/>
+			<Channel>Microsoft-Windows-Sysmon/Operational</Channel>
+			<Computer>buddy-pc</Computer>
+			<Security UserID="S-1-5-18"/>
+		</System>
+		<EventData>
+			<Data Name="RuleName"/>
+			<Data Name="EventType">CreatePipe</Data>
+			<Data Name="UtcTime">2021-01-25 14:25:36.678</Data>
+			<Data Name="ProcessGuid">{d16cb8c4-d4d6-600e-0000-0010da791a00}</Data>
+			<Data Name="ProcessId">2448</Data>
+			<Data Name="PipeName">userpipe</Data>
+			<Data Name="Image">C:\Python27\pythonw.exe</Data>
+		</EventData>
+	</Event>
+	<Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
+		<System>
+			<Provider Guid="{5770385f-c22a-43e0-bf4c-06f5698ffbd9}" Name="Microsoft-Windows-Sysmon"/>
+			<EventID>18</EventID>
+			<Version>1</Version>
+			<Level>4</Level>
+			<Task>18</Task>
+			<Opcode>0</Opcode>
+			<Keywords>0x8000000000000000</Keywords>
+			<TimeCreated SystemTime="2021-01-25T14:25:36.688647500Z"/>
+			<EventRecordID>86</EventRecordID>
+			<Correlation/>
+			<Execution ProcessID="5096" ThreadID="1436"/>
+			<Channel>Microsoft-Windows-Sysmon/Operational</Channel>
+			<Computer>buddy-pc</Computer>
+			<Security UserID="S-1-5-18"/>
+		</System>
+		<EventData>
+			<Data Name="RuleName"/>
+			<Data Name="EventType">ConnectPipe</Data>
+			<Data Name="UtcTime">2021-01-25 14:25:36.678</Data>
+			<Data Name="ProcessGuid">{d16cb8c4-d4d6-600e-0000-0010da791a00}</Data>
+			<Data Name="ProcessId">2448</Data>
+			<Data Name="PipeName">&lt;Anonymous Pipe&gt;</Data>
+			<Data Name="Image">C:\Python27\pythonw.exe</Data>
+		</EventData>
+	</Event>
+	<Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
+		<System>
+			<Provider Guid="{5770385F-C22A-43E0-BF4C-06F5698FFBD9}" Name="Microsoft-Windows-Sysmon"/>
+			<EventID>8</EventID>
+			<Version>2</Version>
+			<Level>4</Level>
+			<Task>8</Task>
+			<Opcode>0</Opcode>
+			<Keywords>0x8000000000000000</Keywords>
+			<TimeCreated SystemTime="2020-11-04T18:42:01.118750000Z"/>
+			<EventRecordID>59712</EventRecordID>
+			<Correlation/>
+			<Execution ProcessID="1676" ThreadID="2512"/>
+			<Channel>Microsoft-Windows-Sysmon/Operational</Channel>
+			<Computer>buddy-pc-win7</Computer>
+			<Security UserID="S-1-5-18"/>
+		</System>
+		<EventData>
+			<Data Name="RuleName"/>
+			<Data Name="UtcTime">2020-11-04 18:42:01.103</Data>
+			<Data Name="SourceProcessGuid">{EBC3FDE9-F5C9-5FA2-0000-0010D4050100}</Data>
+			<Data Name="SourceProcessId">992</Data>
+			<Data Name="SourceImage">C:\Windows\System32\excel.exe</Data>
+			<Data Name="TargetProcessGuid">{EBC3FDE9-F5F8-5FA2-0000-001050A20800}</Data>
+			<Data Name="TargetProcessId">3984</Data>
+			<Data Name="TargetImage">C:\Windows\System32\winlogon.exe</Data>
+			<Data Name="NewThreadId">4080</Data>
+			<Data Name="StartAddress">0x000007FF25273DC0</Data>
+			<Data Name="StartModule">C:\windows\system32\UXINIT.dll</Data>
+			<Data Name="StartFunction"/>
+		</EventData>
+	</Event>
+	<Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
+		<System>
+			<Provider Guid="{5770385F-C22A-43E0-BF4C-06F5698FFBD9}" Name="Microsoft-Windows-Sysmon"/>
+			<EventID>8</EventID>
+			<Version>2</Version>
+			<Level>4</Level>
+			<Task>8</Task>
+			<Opcode>0</Opcode>
+			<Keywords>0x8000000000000000</Keywords>
+			<TimeCreated SystemTime="2020-11-04T18:42:01.118750000Z"/>
+			<EventRecordID>59712</EventRecordID>
+			<Correlation/>
+			<Execution ProcessID="1676" ThreadID="2512"/>
+			<Channel>Microsoft-Windows-Sysmon/Operational</Channel>
+			<Computer>buddy-pc-win7</Computer>
+			<Security UserID="S-1-5-18"/>
+		</System>
+		<EventData>
+			<Data Name="RuleName"/>
+			<Data Name="UtcTime">2020-11-04 18:42:01.103</Data>
+			<Data Name="SourceProcessGuid">{EBC3FDE9-F5C9-5FA2-0000-0010D4050100}</Data>
+			<Data Name="SourceProcessId">992</Data>
+			<Data Name="SourceImage">C:\Windows\System32\excel.exe</Data>
+			<Data Name="TargetProcessGuid">{EBC3FDE9-F5F8-5FA2-0000-001050A20800}</Data>
+			<Data Name="TargetProcessId">0C88</Data>
+			<Data Name="TargetImage">C:\Windows\System32\winlogon.exe</Data>
+			<Data Name="NewThreadId">4080</Data>
+			<Data Name="StartAddress">0x000007FF25273DC0</Data>
+			<Data Name="StartModule">null</Data>
+			<Data Name="StartFunction"/>
 		</EventData>
 	</Event>
 </Events>
