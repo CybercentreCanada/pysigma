@@ -1,13 +1,12 @@
+import typing
+
 from . import signatures
+from .exceptions import UnsupportedFeature
 from . import parser
 from yaml.composer import ComposerError
 import logging
 logger = logging.getLogger('pysigma')
 logger.setLevel(logging.INFO)
-
-
-class UnsupportedFeature(RuntimeError):
-    pass
 
 
 def val_file(filename):
@@ -31,7 +30,7 @@ class PySigma:
         self.rules = {}
         self.callback = None
 
-    def add_signature(self, signature_file):
+    def add_signature(self, signature_file: typing.IO):
         signature = signatures.load_signature(signature_file)
         for detection in signature.detections:
             if 'near' in detection.detection.get('condition', ''):
@@ -45,14 +44,14 @@ class PySigma:
         for r in forbidden_rules:
             if r in self.rules:
                 del self.rules[r]
+        all_alerts = []
         for event in events:
             alerts = parser.check_event(event, rules=self.rules)
             if self.callback:
                 for a in alerts:
                     self.callback(a, event)
-            else:
-                raise ValueError("There's no callback")
-            pass
+            all_alerts.extend(alerts)
+        return all_alerts
 
     def register_callback(self, c):
         self.callback = c

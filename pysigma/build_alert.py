@@ -1,5 +1,4 @@
 from datetime import datetime
-from .signatures import get_description, get_yaml_name, get_level
 
 
 class Alert:

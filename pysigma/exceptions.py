@@ -1,0 +1,3 @@
+
+class UnsupportedFeature(RuntimeError):
+    pass

@@ -3,7 +3,12 @@ import fnmatch
 import re
 import base64
 
-from .signatures import get_condition, get_data
+
+def match_search_id(signature, event, search_id):
+    search_fields = signature.get_search_fields(search_id)
+    if search_fields:
+        return find_matches(event, search_fields)
+    raise ValueError()
 
 
 def check_pair(event, key, value):
@@ -59,7 +64,7 @@ def check_pair(event, key, value):
 
         elif '*' in str(value):
             if isinstance(value, list):
-                flags = [ fnmatch.fnmatch(event[key], pattern) for pattern in value ]
+                flags = [fnmatch.fnmatch(event[key], pattern) for pattern in value]
                 return True if True in flags else False
             return fnmatch.fnmatch(event[key], value)
 
@@ -159,6 +164,7 @@ def find_all_matches(event, rule_dict):
                             matches.append(True)
     return matches
 
+
 def analyze_condition(event, rule_dict, condition, rule_name):
     indicators = re.split('[(]|[)]| of |not| and | or |[|]', condition)
     for word in indicators:
@@ -174,6 +180,7 @@ def analyze_condition(event, rule_dict, condition, rule_name):
             else:
                 matches[word] = False
     return matches
+
 
 def analyze(event, rule_name, rule_dict):
     """

@@ -1,1 +1,2 @@
-from .pysigma import PySigma, UnsupportedFeature
+from .exceptions import UnsupportedFeature
+from .pysigma import PySigma

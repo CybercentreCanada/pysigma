@@ -44,6 +44,7 @@ def test_load_sample_rules(upstream_rules):
                 unsupported += 1
             except Exception:
                 print("failed on ", dir_path, file_name)
+                raise
                 traceback.print_exc()
                 failed += 1
 
