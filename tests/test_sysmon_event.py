@@ -15,11 +15,11 @@ logfile_path = os.path.abspath(os.path.join(os.path.dirname(__file__), './xml_ex
 @pytest.fixture
 def sigma_parser():
     sigma_parser = PySigma()
-    sigma_parser = add_signature(sigma_parser)
+    sigma_parser = load_rule(sigma_parser)
     return sigma_parser
 
 
-def add_signature(sigma_parser):
+def load_rule(sigma_parser):
     rules = os.listdir(RULE_DIR)
     for rule in rules:
         with open(os.path.join(RULE_DIR, rule), 'r') as fp:
@@ -52,6 +52,13 @@ def build_sysmon_events():
     except KeyError:
         raise ValueError("The input file %s does not contain any events or is improperly formatted")
     return events
+
+
+def check_events(self, events):
+    for event in events:
+        alerts = parser.check_event(event, rules=self.rules)
+        if alerts:
+            print('alerts ', alerts)
 
 
 def test_check_logfile(sigma_parser):
