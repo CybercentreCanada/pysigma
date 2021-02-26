@@ -57,7 +57,15 @@ class PySigma:  # what should I name it?
     @staticmethod
     def build_sysmon_events(logfile_path):
         log_dict = parser.load_events(logfile_path)
-        return log_dict
+        try:
+            # handle single event
+            if type(log_dict['Events']['Event']) is list:
+                events = log_dict['Events']['Event']
+            else:
+                events = [log_dict['Events']['Event']]
+        except KeyError:
+            raise ValueError("The input file %s does not contain any events or is improperly formatted")
+        return events
 
     def check_logfile(self, logfile_path):
         events = self.build_sysmon_events(logfile_path)

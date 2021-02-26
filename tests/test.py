@@ -68,3 +68,4 @@ def test_add_signature(sigma_parser):
 def test_check_logfile(sigma_parser):
     events = build_sysmon_events()
     check_events(sigma_parser, events)
+
