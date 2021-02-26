@@ -1,7 +1,11 @@
-from typing import Dict, Callable
+"""
+This parser uses lark to transform the condition strings from signatures into callbacks that
+invoke the right sequence of searches into the rule and logic operations.
+"""
+from typing import Dict, Callable, Union
 from pathlib import Path
 
-from .WindowsEventLogsHelper import prepareEventLog
+from .windows_event_logs import prepare_event_log
 from .build_alert import callback_buildReport, Alert, check_timeframe
 from .exceptions import UnsupportedFeature
 from .sigma_scan import analyze_x_of, match_search_id
@@ -9,15 +13,7 @@ from .sigma_scan import analyze_x_of, match_search_id
 from lark import Lark, Transformer
 
 
-SCRIPT_LOCATION = Path(__file__).resolve().parent
-
-# Rules & events to be tested
-# test_rules = SCRIPT_LOCATION / Path("rules")
-# event_logfiles = []
-# rules: Dict[str, Dict] = {}
-# event = None
-# rule = None
-# timed_events = {}
+# SCRIPT_LOCATION = Path(__file__).resolve().parent
 
 
 # Grammar defined for the condition strings within the Sigma rules
@@ -60,102 +56,8 @@ grammar = '''
         '''
 
 
-# class LogicTransformer(Transformer):
-#     """
-#     Defines what each rule (as specified within the grammar) is meant to do, in order to determine the truth value of the
-#     condition string within each Sigma .yml file.
-#     Works recursively.
-#     """
-#
-#     def identifier_rule(self, args):
-#         # Call analyze on all rules in the rule directory to find matches for each event
-#         hits = analyze(event, str(rule), rules[rule])
-#         if args in hits:
-#             return hits[args]
-#
-#     def atom_rule(self, args):
-#         if isinstance(args, list):
-#             if args[0] == True or args[0] == False:
-#                 return args[0]
-#             elif args[0].data == 'x_of':
-#                 return self.x_of_rule(args[0].children)
-#         elif args == True or args == False:
-#             return args
-#         elif args.data == 'atom':
-#             if args.children[0] == True or args.children[0] == False:
-#                 return args.children[0]
-#             elif args.children[0].data == 'search_id':
-#                 return self.identifier_rule(args.children[0].children[0].value)
-#             elif args.children[0].data == 'x_of':
-#                 return self.x_of_rule(args.children[0].children[0].value)
-#         return None
-#
-#     def not_rule(self, args):
-#         if args == True or args == False:
-#             return args
-#         elif args[0] == 'not':
-#             left = self.atom_rule(args[1])
-#             for right in args[1:]:
-#                 left = not self.atom_rule(right)
-#             return left
-#         return self.atom_rule(args[0])
-#
-#     def and_rule(self, args):
-#         if args == True or args == False:
-#             return args
-#         elif len(args) >= 2 and (args[0] == True or args[0] == False):
-#             left = args[0]
-#             for right in args[1:]:
-#                 left = left and right
-#             return left
-#         elif args[0] == 'and_rule':
-#             left = self.not_rule(args[1])
-#             for right in args[1:]:
-#                 left = left and self.not_rule(right)
-#             return left
-#         return self.not_rule(args[0])
-#
-#     def or_rule(self, args):
-#         if args == True or args == False:
-#             return args
-#         elif len(args) >= 2 and (args[0] == True or args[0] == False):
-#             left = args[0]
-#             for right in args[1:]:
-#                 left = left or right
-#             return left
-#         elif args[0] == 'or_rule':
-#             left = self.and_rule(args[1])
-#             for right in args[1:]:
-#                 left = left or self.and_rule(right)
-#             return left
-#         return self.and_rule(args[0])
-#
-#     def pipe_rule(self, args):
-#         if args == True or args == False:
-#             return args
-#         elif len(args) == 2 and (args[0] == True or args[0] == False):
-#             return args[0] and args[1]
-#         elif args[0] == 'not':
-#             left = self.or_rule(args[1])
-#             for right in args[1:]:
-#                 left = left and self.or_rule(right)
-#             return left
-#         return self.or_rule(args[0])
-#
-#     def x_of_rule(self, args):
-#         if args[0] == True or args[0] == False:
-#             return args[0]
-#         elif args[0].data == 'x':
-#             return analyze_x_of(event, str(rule), rules[rule])
-#         return None
-#
-#
-# # Create & initialize Lark class instance
-# parser = Lark(grammar, parser='lalr', keep_all_tokens=True)
-#
-
 def check_event(raw_event, rules):
-    event = prepareEventLog(raw_event)
+    event = prepare_event_log(raw_event)
     alerts = []
     timed_events = []
 
@@ -206,16 +108,17 @@ def check_event(raw_event, rules):
 #     return file_event_alerts
 
 
-def true_function(*state):
+def true_function(*_state):
     return True
 
 
-def false_function(*state):
+def false_function(*_state):
     return False
 
 
 class FactoryTransformer(Transformer):
-    def start(self, args):
+    @staticmethod
+    def start(args):
         return args[0]
 
     @staticmethod
@@ -231,12 +134,14 @@ class FactoryTransformer(Transformer):
     def search_pattern(args):
         return args[0].value
 
-    def atom(self, args):
+    @staticmethod
+    def atom(args):
         if not all((callable(_x) for _x in args)):
             raise ValueError(args)
         return args[0]
 
-    def not_rule(self, args):
+    @staticmethod
+    def not_rule(args):
         negate, value = args
         assert callable(value)
         if negate is None:
@@ -246,7 +151,8 @@ class FactoryTransformer(Transformer):
             return not value(*state)
         return _negate
 
-    def and_rule(self, args):
+    @staticmethod
+    def and_rule(args):
         if not all((callable(_x) for _x in args)):
             raise ValueError(args)
 
@@ -261,7 +167,8 @@ class FactoryTransformer(Transformer):
 
         return _and_operation
 
-    def or_rule(self, args):
+    @staticmethod
+    def or_rule(args):
         if not all((callable(_x) for _x in args)):
             raise ValueError(args)
 
@@ -276,10 +183,12 @@ class FactoryTransformer(Transformer):
 
         return _or_operation
 
-    def pipe_rule(self, args):
+    @staticmethod
+    def pipe_rule(args):
         return args[0]
 
-    def x_of(self, args):
+    @staticmethod
+    def x_of(args):
         # Load the left side of the X of statement
         count = None
         if args[0].children[0].type == 'NUMBER':
@@ -299,10 +208,12 @@ class FactoryTransformer(Transformer):
             return analyze_x_of(signature, event, count, selector)
         return _check_of_sections
 
-    def aggregation_expression(self, args):
+    @staticmethod
+    def aggregation_expression(args):
         raise UnsupportedFeature("Aggregation expressions not supported.")
 
-    def near_aggregation(self, args):
+    @staticmethod
+    def near_aggregation(args):
         raise UnsupportedFeature("Near operation not supported.")
 
 
@@ -310,7 +221,7 @@ class FactoryTransformer(Transformer):
 factory_parser = Lark(grammar, parser='lalr', transformer=FactoryTransformer(), maybe_placeholders=True)
 
 
-def prepare_condition(raw_condition):
+def prepare_condition(raw_condition: Union[str, list]) -> Callable:
     if isinstance(raw_condition, list):
         raw_condition = '(' + ') or ('.join(raw_condition) + ')'
     return factory_parser.parse(raw_condition)

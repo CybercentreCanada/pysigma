@@ -1,3 +1,4 @@
 lark-parser
+xmltodict
 PyYAML
 evtx

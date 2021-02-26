@@ -6,7 +6,7 @@ from yaml.composer import ComposerError
 from . import signatures
 from .exceptions import UnsupportedFeature
 from . import parser
-from .WindowsEventLogsHelper import load_events
+from .windows_event_logs import load_events
 
 logger = logging.getLogger('pysigma')
 logger.setLevel(logging.INFO)
