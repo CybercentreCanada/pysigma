@@ -17,10 +17,11 @@ class Detection:
     def __init__(self, data):
         self.detection = data['detection']
         self.logsource = data.get('logsource')
+        self.timeframe = self.detection.pop('timeframe', None)
 
         self.condition = None
         if 'condition' in self.detection:
-            self.condition = prepare_condition(self.detection['condition'])
+            self.condition = prepare_condition(self.detection.pop('condition'))
 
 
 class Signature:
@@ -54,11 +55,15 @@ class Signature:
     def get_condition(self):
         return self.detections[0].condition
 
+    def get_all_searches(self):
+        return dict(self.detections[0].detection)
+
     def get_search_fields(self, search_id):
         return self.detections[0].detection.get(search_id)
 
     def get_timeframe(self):
-        return self.detections[0].detection.get('timeframe')
+        return self.detections[0].timeframe
+
 
 def load_signatures(signature_dir) -> Dict[str, Signature]:
     """

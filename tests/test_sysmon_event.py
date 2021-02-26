@@ -4,7 +4,7 @@ Find way to validate that events are hitting on the right rules
 import os
 import os.path
 import pytest
-from pysigma import PySigma, parser
+from pysigma import PySigma, parser, load_events
 
 
 RULE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../rules'))
@@ -42,7 +42,7 @@ def test_init():
 
 
 def build_sysmon_events():
-    log_dict = parser.load_events(logfile_path)
+    log_dict = load_events(logfile_path)
     try:
         # handle single event
         if type(log_dict['Events']['Event']) is list:

@@ -157,6 +157,7 @@ grammar = '''
 def check_event(raw_event, rules):
     event = prepareEventLog(raw_event)
     alerts = []
+    timed_events = []
 
     for rule_name, rule_obj in rules.items():
         condition = rule_obj.get_condition()
@@ -276,21 +277,15 @@ class FactoryTransformer(Transformer):
         return _or_operation
 
     def pipe_rule(self, args):
-        value, aggregation = args
-        assert callable(value)
-        if aggregation is None:
-            return value
-
-        def _run_pipe(hits):
-            raise NotImplementedError()
-        return _run_pipe
+        return args[0]
 
     def x_of(self, args):
-        print(args)
-        target = None
+        # Load the left side of the X of statement
+        count = None
         if args[0].children[0].type == 'NUMBER':
-            target = int(args[0].children[0].value)
+            count = int(args[0].children[0].value)
 
+        # Load the right side of the X of statement
         selector = None
         if isinstance(args[2], str):
             selector = args[2]
@@ -299,10 +294,9 @@ class FactoryTransformer(Transformer):
         else:
             raise ValueError()
 
-        # If its not "them" we need to use the value on the right side as a
-        # search-id or pattern to select the detection sections to match
-        def _check_of_sections(hits):
-            return apply_x_of(hits, target, selector)
+        # Create a closure on our
+        def _check_of_sections(signature, event):
+            return analyze_x_of(signature, event, count, selector)
         return _check_of_sections
 
     def aggregation_expression(self, args):

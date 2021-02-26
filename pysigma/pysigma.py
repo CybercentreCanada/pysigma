@@ -1,10 +1,13 @@
 import typing
+import logging
+
+from yaml.composer import ComposerError
 
 from . import signatures
 from .exceptions import UnsupportedFeature
 from . import parser
-from yaml.composer import ComposerError
-import logging
+from .WindowsEventLogsHelper import load_events
+
 logger = logging.getLogger('pysigma')
 logger.setLevel(logging.INFO)
 
@@ -58,7 +61,7 @@ class PySigma:
 
     @staticmethod
     def build_sysmon_events(logfile_path):
-        log_dict = parser.load_events(logfile_path)
+        log_dict = load_events(logfile_path)
         return log_dict
 
     def check_logfile(self, logfile_path):

@@ -165,129 +165,84 @@ def find_all_matches(event, rule_dict):
     return matches
 
 
-def analyze_condition(event, rule_dict, condition, rule_name):
-    indicators = re.split('[(]|[)]| of |not| and | or |[|]', condition)
-    for word in indicators:
-        if word == '':
-            indicators.remove(word)
-    matches = {}
-
-    for word in indicators:
-        word = word.strip()
-        if word in rule_dict['detection']:
-            if find_matches(event, get_data(rule_dict, word)) and str(rule_name):
-                matches[word] = True
-            else:
-                matches[word] = False
-    return matches
-
-
-def analyze(event, rule_name, rule_dict):
-    """
-    Analyzes the truth value of each condition specified within the condition string of the rule.
-
-    :param event: dict, event read from the Sysmon log
-    :param rule_name: str, name of the rule
-    :param rule_dict: dict, dictionary containing the rule info from Sigma .yml files.
-    :return: dict, dictionary of truth values
-    """
-
-    condition = get_condition(rule_dict, rule_name)
-    if isinstance(condition, list):
-        list_matches = [analyze_condition(event, rule_dict, c, rule_name) for c in condition]
-        return list_matches
-
-    if isinstance(condition, str):
-        matches = analyze_condition(event, rule_dict, condition, rule_name)
-        return [matches]
-
-
+# def analyze_condition(event, rule_dict, condition, rule_name):
+#     indicators = re.split('[(]|[)]| of |not| and | or |[|]', condition)
+#     for word in indicators:
+#         if word == '':
+#             indicators.remove(word)
+#     matches = {}
+#
+#     for word in indicators:
+#         word = word.strip()
+#         if word in rule_dict['detection']:
+#             if find_matches(event, get_data(rule_dict, word)) and str(rule_name):
+#                 matches[word] = True
+#             else:
+#                 matches[word] = False
+#     return matches
+#
+#
+# def analyze(event, rule_name, rule_dict):
+#     """
+#     Analyzes the truth value of each condition specified within the condition string of the rule.
+#
+#     :param event: dict, event read from the Sysmon log
+#     :param rule_name: str, name of the rule
+#     :param rule_dict: dict, dictionary containing the rule info from Sigma .yml files.
+#     :return: dict, dictionary of truth values
+#     """
+#
+#     condition = get_condition(rule_dict, rule_name)
+#     if isinstance(condition, list):
+#         list_matches = [analyze_condition(event, rule_dict, c, rule_name) for c in condition]
+#         return list_matches
+#
+#     if isinstance(condition, str):
+#         matches = analyze_condition(event, rule_dict, condition, rule_name)
+#         return [matches]
 
 
-
-def analyze_x_of(event, rule_name, rule_dict):
+def analyze_x_of(signature, event, count, selector):
     """
     Analyzes the truth value of an 'x of' condition specified within the condition string of the rule.
 
-    :param event: dict, event read from the Sysmon log
-    :param rule_name: str, name of the rule
-    :param rule_dict: dict, dictionary containing the rule info from Sigma .yml files
+    :param signature: Signature currently being applied
+    :param event: event currently being scanned
+    :param count: left side of the x of statement, either 1 or None (for all)
+    :param selector: right side of the x of statement, a pattern or None (for all)
     :return: bool, truth value of 'x of' condition
     """
 
-    condition = get_condition(rule_dict, rule_name)
+    # First we need to choose our set of fields based on our selector.
+    matches = {}
+    all_searches = signature.get_all_searches()
 
-    indicators = re.split('[(]|[)]| of |not| and | or |[|]', condition)
-    valid_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-    for word in indicators:
-        if indicators[0] == '':
-            indicators.remove(indicators[0])
-        elif word == '':
-            indicators.remove(word)
-        elif indicators[0].strip() not in valid_chars:
-            if word != 'all':
-                indicators.remove(word)
-        if word == 'all' or indicators[0].strip() in valid_chars:
-            break
-
-    count = indicators[0].strip()
-    search_id = indicators[1]
-
-    matches = []
-
-    if search_id.endswith('*'):
-
-        search_id = search_id.strip('*')
-
-        for word in rule_dict['detection']:
-            if word.startswith(search_id):
-                if find_matches(event, get_data(rule_dict, word)) and str(rule_name):
-                    matches.append(True)
-                else:
-                    matches.append(False)
-
-        if count == 'all':
-            if False in matches:
-                return False
-            return True
-        else:
-            count = int(count)
-            if matches.count(True) == count:
-                return True
-            return False
-
-    elif search_id == 'them':
-
-        for word in rule_dict['detection']:
-            if word != 'condition':
-                if find_matches(event, get_data(rule_dict, word)) and str(rule_name):
-                    matches.append(True)
-                    if count != 'all':
-                        count = int(count)
-                        if matches.count(True) == count:
-                            return True
-                else:
-                    matches.append(False)
-                    if count == 'all':
-                        return False
-
-        if count == 'all':
-            return True
-        return False
-
+    if selector is None:  # None indicates all.
+        matches = all_searches
     else:
+        for search_id, search_fields in all_searches.items():
+            if fnmatch.fnmatch(search_id, selector):
+                matches[search_id] = search_fields
 
-        matches = find_all_matches(event, get_data(rule_dict, search_id))
+    if count is None:
+        count = len(matches)
+    permitted_misses = len(matches) - count
 
-        if count == 'all':
-            if False in matches:
-                return False
-            return True
+    # Now that we have our searches to check, run them
+    search_hits = 0
+    search_misses = 0
+    for search_id, search_fields in matches.items():
+        if find_matches(event, search_fields):
+            search_hits += 1
         else:
-            count = int(count)
-            if matches.count(True) == count:
-                return True
+            search_misses += 1
+
+        # Short circuit if we found the matches, or if we can't find the number anymore
+        if search_hits <= count:
+            return True
+        if search_misses >= permitted_misses:
             return False
+    return False
 
 
 
