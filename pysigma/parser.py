@@ -30,7 +30,7 @@ grammar = '''
         search_id: SEARCH_ID 
         x: ALL | NUMBER
         x_of: x OF (THEM | search_pattern)
-        search_pattern: /[a-zA-Z_][a-zA-Z0-9*_]*/
+        search_pattern: /[a-zA-Z*_][a-zA-Z0-9*_]*/
         aggregation_expression: aggregation_function "(" [aggregation_field] ")" [ "by" group_field ] comparison_op value 
                               | near_aggregation
         aggregation_function: COUNT | MIN | MAX | AVG | SUM

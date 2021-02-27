@@ -1,6 +1,6 @@
 import os
-import typing
-from typing import Dict, List
+from typing import Dict, List, IO, Union, Any, Optional, Callable, Tuple
+import base64
 import re
 
 import yaml
@@ -13,15 +13,166 @@ class SignatureLoadError(KeyError):
     pass
 
 
+# TODO We need to support the rest of them
+SUPPORTED_MODIFIERS = {
+    'contains',
+    'all',
+    'base64',
+    # 'base64offset'
+    'endswith',
+    'startswith',
+    # 'utf16le',
+    # 'utf16be',
+    # 'wide',
+    # 'utf16',
+    # 're',
+}
+
+
+Query = Optional[Union[str, re.Pattern]]
+DetectionMap = Dict[
+    str,
+    Tuple[List[Query], List[str]]
+]
+
+
+def process_field_name(field_string):
+    name_and_modifiers = field_string.split('|')
+    name = name_and_modifiers.pop(0)
+    modifiers = [_m for _m in name_and_modifiers if _m]
+    unsupported = set(modifiers) - SUPPORTED_MODIFIERS
+    if unsupported:
+        raise UnsupportedFeature(f"Unsupported field modifiers used: {unsupported}")
+    return name, modifiers
+
+
+_NSC = NON_SPECIAL_CHARACTERS = r'[^\\*?]*'
+ESCAPED_SPECIAL_CHARACTER = r'(?:\\[*?])'
+ESCAPED_OTHER_CHARACTER = r'(?:\\[^*?])'
+ESCAPED_WILDCARD_PATTERN = re.compile(fr'(?:{_NSC}{ESCAPED_SPECIAL_CHARACTER}*{ESCAPED_OTHER_CHARACTER})*')
+
+UPTO_WILDCARD = re.compile(r'^([^\\?*]+|(?:\\[^?*\\])+)+')
+
+
+def sigma_string_to_regex(original_value: str):
+    value = original_value
+    full_content = []
+    while value:
+        # Grab any content up to the first wildcard
+        match = UPTO_WILDCARD.match(value)
+        if match:
+            # The non regex content in the sigma string, may have characters special to regex
+            matched = match.group(0)
+            full_content.append(re.escape(matched))
+            value = value[len(matched):]
+        elif value.startswith('*'):
+            full_content.append('.*')
+            value = value[1:]
+        elif value.startswith('\\*'):
+            full_content.append(re.escape('*'))
+            value = value[2:]
+        elif value.startswith('?'):
+            full_content.append('.')
+            value = value[1:]
+        elif value.startswith('\\?'):
+            full_content.append(re.escape('?'))
+            value = value[2:]
+        elif value.startswith('\\\\'):
+            full_content.append(re.escape('\\'))
+            value = value[2:]
+        elif value.startswith('\\'):
+            full_content.append(re.escape('\\'))
+            value = value[1:]
+        else:
+            raise ValueError(f"Could not parse string matching pattern: {original_value}")
+
+    return re.compile(''.join(full_content), flags=re.IGNORECASE)  # Sigma strings are case insensitive
+
+
+def apply_modifiers(value: str, modifiers: List[str]) -> Query:
+    """
+    Apply as many modifiers as we can during signature construction
+    to speed up the matching stage as much as possible.
+    """
+    # Apply base64 encoding
+    for mod in modifiers:
+        if mod == 'base64':
+            value = base64.encodebytes(value.encode()).decode()
+        elif mod == 'contains':
+            value = '*' + value + '*'
+        elif mod == 'endswith':
+            value = '*' + mod
+        elif mod == 'startswith':
+            value = mod + '*'
+
+    # If there are wildcards, or we are using the regex modifier, compile the query
+    # string to a regex pattern object
+    if 're' in modifiers:
+        return re.compile(value)
+
+    if not ESCAPED_WILDCARD_PATTERN.fullmatch(value):
+        # Transform the unescaped wildcards to their regex equivalent
+        return sigma_string_to_regex(value)
+
+    # If we are just doing a full string compare of a raw string, the comparison
+    # is case-insensitive in sigma, so all direct string comparisons will be lowercase.
+    value = value.replace('\\*', '*').replace('\\?', '?')
+    return value.lower()
+
+
+class DetectionField:
+    def __init__(self, list_search=None, map_search=None):
+        self.list_search: List[Query] = list_search
+        self.map_search: List[DetectionMap] = map_search
+
+
+def normalize_field_map(field: Dict[str, Any]) -> DetectionMap:
+    out: DetectionMap = {}
+    for raw_key, value in field.items():
+        key, modifiers = process_field_name(raw_key)
+        if value is None:
+            out[key] = [None], modifiers
+        elif isinstance(value, list):
+            out[key] = [
+                apply_modifiers(str(_v), modifiers) if _v is not None else None
+                for _v in value
+            ], modifiers
+        else:
+            out[key] = [apply_modifiers(str(value), modifiers)], modifiers
+
+    return out
+
+
+def normalize_field_block(name: str, field: Any) -> DetectionField:
+    if isinstance(field, dict):
+        return DetectionField(map_search=[normalize_field_map(field)])
+
+    if isinstance(field, list):
+        if all(isinstance(_x, dict) for _x in field):
+            return DetectionField(map_search=[normalize_field_map(_x) for _x in field])
+        return DetectionField(list_search=[apply_modifiers(str(_x), ['contains']) for _x in field])
+
+    raise ValueError(f"Failed to parse selection field {name}: {field}")
+
+
+def normalize_detection(detection: Dict[str, Any]) -> Dict[str, DetectionField]:
+    return {
+        name: normalize_field_block(name, data)
+        for name, data in detection.items()
+    }
+
+
 class Detection:
     def __init__(self, data):
-        self.detection = data['detection']
+        detection = data['detection']
         self.logsource = data.get('logsource')
-        self.timeframe = self.detection.pop('timeframe', None)
+        self.timeframe = detection.pop('timeframe', None)
 
         self.condition = None
-        if 'condition' in self.detection:
-            self.condition = prepare_condition(self.detection.pop('condition'))
+        if 'condition' in detection:
+            self.condition = prepare_condition(detection.pop('condition'))
+
+        self.detection = normalize_detection(detection)
 
 
 class Signature:
@@ -45,6 +196,12 @@ class Signature:
             if 'detection' in segment:
                 self.detections.append(Detection(segment))
 
+                # The sigma spec repeatedly uses examples where the condition
+                # is in the wrong place relative to the rest of the standard
+                # so catch that here I suppose
+                if self.detections[-1].condition is None and 'condition' in segment:
+                    self.detections[-1].condition = prepare_condition(segment['condition'])
+
         if self.title is None:
             raise SignatureLoadError('title')
         if len(self.detections) == 0:
@@ -52,13 +209,13 @@ class Signature:
         if len(self.detections) > 1:
             raise UnsupportedFeature()
 
-    def get_condition(self):
+    def get_condition(self) -> Callable:
         return self.detections[0].condition
 
-    def get_all_searches(self):
+    def get_all_searches(self) -> Dict[str, DetectionField]:
         return dict(self.detections[0].detection)
 
-    def get_search_fields(self, search_id):
+    def get_search_fields(self, search_id) -> DetectionField:
         return self.detections[0].detection.get(search_id)
 
     def get_timeframe(self):
@@ -87,7 +244,7 @@ def load_signatures(signature_dir) -> Dict[str, Signature]:
         raise KeyError("Error in Formatting of Rules: Verify your YAML documents")
 
 
-def load_signature(signature_file: typing.IO) -> Signature:
+def load_signature(signature_file: Union[IO, str]) -> Signature:
     """
     Load a single sigma signature from a file object
 
@@ -96,7 +253,12 @@ def load_signature(signature_file: typing.IO) -> Signature:
     :param signature_file: a file like object containing sigma yaml
     :return: Signature object
     """
-    return Signature(list(yaml.safe_load_all(signature_file)), file_name=signature_file.name)
+    try:
+        source = signature_file.name
+    except AttributeError:
+        source = '__str__'
+
+    return Signature(list(yaml.safe_load_all(signature_file)), file_name=source)
 
 
 # def escape_compatible(detect):

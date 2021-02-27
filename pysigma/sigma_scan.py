@@ -1,7 +1,10 @@
 
 import fnmatch
 import re
-import base64
+from typing import List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pysigma.signatures import DetectionField, DetectionMap, Query
 
 
 def match_search_id(signature, event, search_id):
@@ -11,7 +14,7 @@ def match_search_id(signature, event, search_id):
     raise ValueError()
 
 
-def check_pair(event, key, value):
+def check_pair(event, key, value: 'Query') -> bool:
     """
     Checks to see if a given key and value from the rule are also in the event.
     Takes into consideration any value modifiers.
@@ -21,149 +24,117 @@ def check_pair(event, key, value):
     :param value: str, given key value
     :return: bool, whether or not the match exists in the event
     """
+    # Before we can apply modifiers and search properly, we need to check if there
+    # is even a value to modify, so do the null checks first
+    if value is None:
+        return event.get(key) is None
+    if key not in event:
+        return False
 
-    if '|' in key:
-        modifiers = key.split('|')
-        for word in modifiers:
-            if word == '':
-                modifiers.remove(word)
-        key = modifiers[0]
-        modifiers = modifiers[1:]
-
+    if isinstance(value, re.Pattern):
+        return bool(value.match(str(event[key])))
     else:
-        modifiers = []
+        # Because by default sigma string matching is case insensitive, lower the event
+        # string before comparing it. The value string is already lowercase.
+        # TODO potential optimization by caching lowercased event fields
+        return str(event[key]).lower() == value
 
-    if key in event:
-        if len(modifiers) > 0:
-            flag = False
-            for word in modifiers:
-                if word == 'contains':
-                    if str(value) in str(event[key]):
-                        flag = True
-                    else:
-                        flag = False
-                elif word == 'all':
-                    return None
-                elif word == 'base64':
-                    if str(event[key]) == str(base64.encodebytes(bytes(value))):
-                        flag = True
-                    else:
-                        flag = False
-                elif word == 'endswith':
-                    if str(event[key]).endswith(str(value)):
-                        flag = True
-                    else:
-                        flag = False
-                elif word == 'startswith':
-                    if str(event[key]).startswith(str(value)):
-                        flag = True
-                    else:
-                        flag = False
 
-            return flag
+def find_matches(event: dict, search: 'DetectionField'):
+    """
+    Matches the items in the rule to the event. Iterates through the sections and if there's a list it iterates
+    through that. Uses checkPair to see if the items in the list/dictionary match items in the event log.
 
-        elif '*' in str(value):
-            if isinstance(value, list):
-                flags = [fnmatch.fnmatch(event[key], pattern) for pattern in value]
-                return True if True in flags else False
-            return fnmatch.fnmatch(event[key], value)
+    :param event: dict, event read from the Sysmon log
+    :param search: An object describin what sort of search to run
+    :return: bool, whether or not we found a match
+    """
+    if search.list_search:
+        for field in search.list_search:
+            for event_key in event:
+                if check_pair(event, event_key, field):
+                    return True
+        return False
 
-        elif str(value) == '' or str(value) == 'null':
-            try:
-                return str(event[key]) == '' or str(event[key]) == 'None'
-            except:
-                return event[key] == '' or str(event[key]) == None
-
-        else:
-            try:
-                return str(event[key]) == str(value)
-            except:
-                return event[key] == str(value)
-
-    else:
-        if str(value) == '' or str(value) == 'null':
+    for field in search.map_search:
+        if find_matches_by_map(event, field):
             return True
+
+    return False
+
+
+def find_matches_by_map(event: dict, search: 'DetectionMap'):
+    """
+
+    :param event:
+    :param search: a dict of fields to search. All must be satisfied.
+    :return:
+    """
+
+    for field_name, (value, modifiers) in search.items():
+        if not find_matches_by_map_entry(event, field_name, value, modifiers):
+            return False
+    return True
+
+
+def find_matches_by_map_entry(event: dict, field_name, field_values: 'List[Query]', modifiers: List[str]):
+    """
+    :param event: the event to search in
+    :param field_name: A field in the event we want to search
+    :param field_values: valid values or patterns for the field in question
+    :return:
+    """
+
+    # Normally any of the values in field_values is acceptable, but the all modifier inverts that
+    if 'all' in modifiers:
+        for permitted_value in field_values:
+            if not check_pair(event, field_name, permitted_value):
+                return False
+        return True
+    else:
+        for permitted_value in field_values:
+            if check_pair(event, field_name, permitted_value):
+                return True
         return False
 
 
-def find_matches(event, rule_dict):
-    """
-    Matches the items in the rule to the event. Iterates through the sections and if there's a list it iterates
-    through that. Uses checkPair to see if the items in the list/dictionary match items in the event log.
-
-    :param event: dict, event read from the Sysmon log
-    :param rule_dict: dict, dictionary containing the rule info from Sigma .yml files.
-    :return: bool, whether or not we found a match
-    """
-
-    flag = False
-    if isinstance(rule_dict, dict):
-        for k, v in rule_dict.items():
-            if isinstance(v, list):
-                for item in v:
-                    if not check_pair(event, k, item):
-                        flag = False
-                    else:
-                        flag = True
-                        break
-
-                if not flag:
-                    return False
-
-            else:
-                if not check_pair(event, k, v):
-                    return False
-                else:
-                    flag = True
-
-    elif isinstance(rule_dict, list):
-            for item in rule_dict:
-                if isinstance(item, dict):
-                    for ik, iv in item.items():
-                        if not check_pair(event, ik, iv):
-                            flag = False
-                        else:
-                            flag = True
-    return flag
-
-
-def find_all_matches(event, rule_dict):
-    """
-    Matches the items in the rule to the event. Iterates through the sections and if there's a list it iterates
-    through that. Uses checkPair to see if the items in the list/dictionary match items in the event log.
-    Keeps track of number of both False and True matches.
-
-    :param event: dict, event read from the Sysmon log
-    :param rule_dict: dict, dictionary containing the rule info from Sigma .yml files.
-    :return: list, list of False/True matches
-    """
-
-    matches = []
-    if isinstance(rule_dict, dict):
-        for k, v in rule_dict.items():
-            if isinstance(v, list):
-                for item in v:
-                    if not check_pair(event, k, item):
-                        matches.append(False)
-                    else:
-                        matches.append(True)
-
-            else:
-                if not check_pair(event, k, v):
-                    matches.append(False)
-                else:
-                    matches.append(True)
-
-    elif isinstance(rule_dict, list):
-            for item in rule_dict:
-                if isinstance(item, dict):
-                    for ik, iv in item.items():
-                        if not check_pair(event, ik, iv):
-                            matches.append(False)
-                        else:
-                            matches.append(True)
-    return matches
-
+# def find_all_matches(event, rule_dict):
+#     """
+#     Matches the items in the rule to the event. Iterates through the sections and if there's a list it iterates
+#     through that. Uses checkPair to see if the items in the list/dictionary match items in the event log.
+#     Keeps track of number of both False and True matches.
+#
+#     :param event: dict, event read from the Sysmon log
+#     :param rule_dict: dict, dictionary containing the rule info from Sigma .yml files.
+#     :return: list, list of False/True matches
+#     """
+#
+#     matches = []
+#     if isinstance(rule_dict, dict):
+#         for k, v in rule_dict.items():
+#             if isinstance(v, list):
+#                 for item in v:
+#                     if not check_pair(event, k, item):
+#                         matches.append(False)
+#                     else:
+#                         matches.append(True)
+#
+#             else:
+#                 if not check_pair(event, k, v):
+#                     matches.append(False)
+#                 else:
+#                     matches.append(True)
+#
+#     elif isinstance(rule_dict, list):
+#             for item in rule_dict:
+#                 if isinstance(item, dict):
+#                     for ik, iv in item.items():
+#                         if not check_pair(event, ik, iv):
+#                             matches.append(False)
+#                         else:
+#                             matches.append(True)
+#     return matches
+#
 
 # def analyze_condition(event, rule_dict, condition, rule_name):
 #     indicators = re.split('[(]|[)]| of |not| and | or |[|]', condition)

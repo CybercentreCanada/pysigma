@@ -33,12 +33,8 @@ class PySigma:
         self.rules = {}
         self.callback = None
 
-    def add_signature(self, signature_file: typing.IO):
+    def add_signature(self, signature_file: typing.Union[typing.IO, str]):
         signature = signatures.load_signature(signature_file)
-        for detection in signature.detections:
-            if 'near' in detection.detection.get('condition', ''):
-                raise UnsupportedFeature("near-aggregation is not supported")
-
         self.rules[signature.title] = signature
         parser.rules = self.rules
 
