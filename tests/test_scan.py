@@ -165,3 +165,77 @@ def test_regex_transform():
     assert sigma_string_to_regex(r'a\a').pattern == r'a\\a'
     assert sigma_string_to_regex(r'a\*a').pattern == r'a\*a'
     assert sigma_string_to_regex(r'a*a').pattern == r'a.*a'
+
+
+def test_1_of_them():
+    # Make sure 1
+    sigma = PySigma()
+    sigma.add_signature("""        
+        title: sample signature
+        detection:
+            a: ["a"]
+            b: ["b"]
+            condition: 1 of them
+    """)
+
+    assert len(sigma.check_events([{'log': 'a', 'Data': []}])) == 1
+    assert len(sigma.check_events([{'log': 'b', 'Data': []}])) == 1
+    assert len(sigma.check_events([{'log': 'ab', 'Data': []}])) == 1
+    assert len(sigma.check_events([{'log': 'c', 'Data': []}])) == 0
+
+
+def test_1_of_x():
+    # Make sure 1
+    sigma = PySigma()
+    sigma.add_signature("""        
+        title: sample signature
+        detection:
+            aa: ["aa"]
+            ab: ["ab"]
+            ba: ["ba"]
+            bb: ["bb"]
+            condition: 1 of a*
+    """)
+
+    assert len(sigma.check_events([{'log': 'aa', 'Data': []}])) == 1
+    assert len(sigma.check_events([{'log': '1ab ba ca', 'Data': []}])) == 1
+    assert len(sigma.check_events([{'log': 'ba', 'Data': []}])) == 0
+    assert len(sigma.check_events([{'log': 'aabb', 'Data': []}])) == 1
+
+
+def test_all_of_them():
+    # Make sure 1
+    sigma = PySigma()
+    sigma.add_signature("""        
+        title: sample signature
+        detection:
+            a: ["a"]
+            b: ["b"]
+            condition: all of them
+    """)
+
+    assert len(sigma.check_events([{'log': 'a', 'Data': []}])) == 0
+    assert len(sigma.check_events([{'log': 'b', 'Data': []}])) == 0
+    assert len(sigma.check_events([{'log': 'ab', 'Data': []}])) == 1
+    assert len(sigma.check_events([{'log': 'bac', 'Data': []}])) == 1
+    assert len(sigma.check_events([{'log': 'c', 'Data': []}])) == 0
+
+
+def test_all_of_x():
+    # Make sure 1
+    sigma = PySigma()
+    sigma.add_signature("""        
+        title: sample signature
+        detection:
+            aa: ["aa"]
+            ab: ["ab"]
+            ba: ["ba"]
+            bb: ["bb"]
+            condition: all of a*
+    """)
+
+    assert len(sigma.check_events([{'log': 'aa', 'Data': []}])) == 0
+    assert len(sigma.check_events([{'log': '1ab ba ca', 'Data': []}])) == 0
+    assert len(sigma.check_events([{'log': 'ba', 'Data': []}])) == 0
+    assert len(sigma.check_events([{'log': 'aabb', 'Data': []}])) == 1
+
