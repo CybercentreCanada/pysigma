@@ -2,18 +2,14 @@
 This parser uses lark to transform the condition strings from signatures into callbacks that
 invoke the right sequence of searches into the rule and logic operations.
 """
-from typing import Dict, Callable, Union
-from pathlib import Path
+from typing import Callable, Union
+
+from lark import Lark, Transformer
 
 from .windows_event_logs import prepare_event_log
 from .build_alert import callback_buildReport, Alert, check_timeframe
 from .exceptions import UnsupportedFeature
 from .sigma_scan import analyze_x_of, match_search_id
-
-from lark import Lark, Transformer
-
-
-# SCRIPT_LOCATION = Path(__file__).resolve().parent
 
 
 # Grammar defined for the condition strings within the Sigma rules
@@ -29,7 +25,7 @@ grammar = '''
         atom: x_of | search_id | "(" pipe_rule ")"
         search_id: SEARCH_ID 
         x: ALL | NUMBER
-        x_of: x OF (THEM | search_pattern)
+        x_of: x OF search_pattern
         search_pattern: /[a-zA-Z*_][a-zA-Z0-9*_]*/
         aggregation_expression: aggregation_function "(" [aggregation_field] ")" [ "by" group_field ] comparison_op value 
                               | near_aggregation
@@ -47,7 +43,6 @@ grammar = '''
         SEARCH_ID: /[a-zA-Z_][a-zA-Z0-9_]*/
         ALL: "all"
         OF: "of"
-        THEM: "them"
         COUNT: "count"
         MIN: "min"
         MAX: "max"
@@ -195,13 +190,9 @@ class FactoryTransformer(Transformer):
             count = int(args[0].children[0].value)
 
         # Load the right side of the X of statement
-        selector = None
-        if isinstance(args[2], str):
-            selector = args[2]
-        elif args[2].type == 'THEM':
-            pass
-        else:
-            raise ValueError()
+        selector = str(args[2])
+        if selector == "them":
+            selector = None
 
         # Create a closure on our
         def _check_of_sections(signature, event):
