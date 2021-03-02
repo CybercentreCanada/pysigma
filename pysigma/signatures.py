@@ -77,7 +77,10 @@ def sigma_string_to_regex(original_value: str):
         elif value.startswith('\\?'):
             full_content.append(re.escape('?'))
             value = value[2:]
-        elif value.startswith('\\\\'):
+        elif value.startswith('\\\\*'):
+            full_content.append(re.escape('\\'))
+            value = value[2:]
+        elif value.startswith('\\\\?'):
             full_content.append(re.escape('\\'))
             value = value[2:]
         elif value.startswith('\\'):
