@@ -209,6 +209,7 @@ def analyze_x_of(signature, event, count, selector):
             search_misses += 1
 
         # Short circuit if we found the matches, or if we can't find the number anymore
+
         if search_hits >= count:
             return True
         if search_misses > permitted_misses:

@@ -39,10 +39,7 @@ class PySigma:
         parser.rules = self.rules
 
     def check_events(self, events):
-        forbidden_rules = ['RDP over Reverse SSH Tunnel WFP', 'Suspicious Execution from Outlook']
-        for r in forbidden_rules:
-            if r in self.rules:
-                del self.rules[r]
+
         all_alerts = []
         for event in events:
             alerts = parser.check_event(event, rules=self.rules)
@@ -58,7 +55,15 @@ class PySigma:
     @staticmethod
     def build_sysmon_events(logfile_path):
         log_dict = load_events(logfile_path)
-        return log_dict
+        try:
+            # handle single event
+            if type(log_dict['Events']['Event']) is list:
+                events = log_dict['Events']['Event']
+            else:
+                events = [log_dict['Events']['Event']]
+        except KeyError:
+            raise ValueError("The input file %s does not contain any events or is improperly formatted")
+        return events
 
     def check_logfile(self, logfile_path):
         events = self.build_sysmon_events(logfile_path)
