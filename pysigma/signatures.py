@@ -46,50 +46,84 @@ def process_field_name(field_string):
     return name, modifiers
 
 
+# This regex should match all strings that have no sigma special characters.
+# Strings that match this don't need to be compiled into a regex.
 _NSC = NON_SPECIAL_CHARACTERS = r'[^\\*?]*'
 ESCAPED_SPECIAL_CHARACTER = r'(?:\\[*?])'
 ESCAPED_OTHER_CHARACTER = r'(?:\\[^*?])'
 ESCAPED_WILDCARD_PATTERN = re.compile(fr'(?:{_NSC}{ESCAPED_SPECIAL_CHARACTER}*{ESCAPED_OTHER_CHARACTER})*')
 
+# Match up to the first character that MIGHT be a sigma special character.
 UPTO_WILDCARD = re.compile(r'^([^\\?*]+|(?:\\[^?*\\])+)+')
 
 
 def sigma_string_to_regex(original_value: str):
+    """ Transform a sigma matching string into a regex.
+
+    Presumed sigma string rules:
+     - non-case sensitive
+     - * is a multi-character wildcard
+     - ? is a single character wildcard
+     - wildcards may be escaped with a backslash
+     - a backslash preceding a wildcard may be escaped with a second backslash
+     - otherwise backslash is not a special character
+
+    :param original_value: A sigma match string
+    :return: A corresponding regex object
+    """
+    # value is the remaining string left to process. Each time we process some of the
+    # input string, we will advance value along the string.
     value = original_value
+
+    # This is a list of output segments which can be combined to produce the final regex.
     full_content = []
+
     while value:
-        # Grab any content up to the first wildcard
+        # Check if the front of the string has non-special characters. Escape them so they are matched
+        # literally in the output regex.
         match = UPTO_WILDCARD.match(value)
         if match:
-            # The non regex content in the sigma string, may have characters special to regex
             matched = match.group(0)
             full_content.append(re.escape(matched))
             value = value[len(matched):]
+        # If the string starts with an unescaped *, that corresponds to the regex .* for any string segment
         elif value.startswith('*'):
             full_content.append('.*')
             value = value[1:]
+        # \* corresponds to a literal * character
         elif value.startswith('\\*'):
             full_content.append(re.escape('*'))
             value = value[2:]
+        # ? is any single character, this is the regex .
         elif value.startswith('?'):
             full_content.append('.')
             value = value[1:]
+        # \? an escaped ? is a literal ?
         elif value.startswith('\\?'):
             full_content.append(re.escape('?'))
             value = value[2:]
+        # \\* is an escaped backslash before a *, the \ is a literal backslash, the * is a wildcard
         elif value.startswith(r'\\*'):
             full_content.append(re.escape('\\') + '.*')
             value = value[3:]
+        # \\? Ditto for above but single character
         elif value.startswith(r'\\?'):
             full_content.append(re.escape('\\') + '.')
             value = value[3:]
+        # The string starts with a \, but it isn't followed by any known special sequence.
+        # This is probably due to an input string with something like \\DeviceName
+        # Consume one backslash at a time in case the input sequence is a series of
+        # backslashes before a wildcard.
         elif value.startswith('\\'):
             full_content.append(re.escape('\\'))
             value = value[1:]
         else:
+            # We should have handled all the cases that the regex will match against, but in case
+            # we have overlooked something, raise an exception showing the string we failed to parse.
             raise ValueError(f"Could not parse string matching pattern: {original_value}")
 
-    return re.compile(''.join(full_content), flags=re.IGNORECASE)  # Sigma strings are case insensitive
+    # Build the regex, with ignore case as sigma strings are case insensitive
+    return re.compile(''.join(full_content), flags=re.IGNORECASE)
 
 
 def apply_modifiers(value: str, modifiers: List[str]) -> Query:
