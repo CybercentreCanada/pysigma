@@ -101,9 +101,9 @@ def apply_modifiers(value: str, modifiers: List[str]) -> Query:
         elif mod == 'contains':
             value = '*' + value + '*'
         elif mod == 'endswith':
-            value = '*' + mod
+            value = '*' + value
         elif mod == 'startswith':
-            value = mod + '*'
+            value = value + '*'
 
     # If there are wildcards, or we are using the regex modifier, compile the query
     # string to a regex pattern object
