@@ -1,5 +1,4 @@
 from datetime import datetime
-from .signatures import get_description, get_yaml_name, get_level
 
 
 class Alert:
@@ -13,7 +12,6 @@ class Alert:
         self.description = description
         self.event = event
         self.level = level
-
 
 
 def callback_buildReport(alert_list, alert):

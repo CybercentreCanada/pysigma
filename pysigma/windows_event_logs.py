@@ -5,14 +5,14 @@ import collections
 import xmltodict
 
 
-def load_events(xmlLog):
+def load_events(xml_file_name):
     """
     Opens Sysmon xml logs as a readable file, and turns the events into dictionaries
-    :param xmlLog: Sysmon xml log to be opened
+    :param xml_file_name: Sysmon xml log to be opened
     :return: dict of the Sysmon event log
     """
     try:
-        with open(xmlLog, "r", encoding='utf-8', errors='ignore') as fp:
+        with open(xml_file_name, "r", encoding='utf-8', errors='ignore') as fp:
             return xmltodict.parse(fp.read())
     except ExpatError:
         raise KeyError("Error: Format error in the Event log file")
@@ -34,7 +34,7 @@ def flattened(event):
     return dict(items)
 
 
-def convertEventDataToKeyValue(event_dict):
+def convert_event_data_to_key_value(event_dict):
     """
     Convert event's data to as key value pair
     Example:
@@ -68,7 +68,7 @@ def convertEventDataToKeyValue(event_dict):
     return event_dict
 
 
-def prepareEventLog(event):
+def prepare_event_log(event):
     """
     Prepares event log for use and info extraction. Flattens event log, and converts event
     to key value pair.
@@ -77,4 +77,4 @@ def prepareEventLog(event):
     """
 
     flat = flattened(event)
-    return convertEventDataToKeyValue(flat)
+    return convert_event_data_to_key_value(flat)

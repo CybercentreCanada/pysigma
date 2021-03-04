@@ -1,9 +1,16 @@
-from . import signatures
-from . import parser
-from yaml.composer import ComposerError
+import typing
 import logging
+
+from yaml.composer import ComposerError
+
+from . import signatures
+from .exceptions import UnsupportedFeature
+from . import parser
+from .windows_event_logs import load_events
+
 logger = logging.getLogger('pysigma')
 logger.setLevel(logging.INFO)
+
 
 def val_file(filename):
     ps = PySigma()
@@ -20,43 +27,35 @@ def val_file(filename):
             logger.error(e)
             return False
 
-class PySigma:  # what should I name it?
+
+class PySigma:
     def __init__(self):
         self.rules = {}
         self.callback = None
 
-    def add_signature(self, signature_file):
-        name, signature = signatures.loadSignature(signature_file)
-        detection = signature.get('detection')
-        if not detection:
-            raise ValueError("No detection key in signature")
-        if 'near' in detection['condition']:
-            raise ValueError("near-aggregation is not supported")
-        self.rules[name] = signature
+    def add_signature(self, signature_file: typing.Union[typing.IO, str]):
+        signature = signatures.load_signature(signature_file)
+        self.rules[signature.title] = signature
         parser.rules = self.rules
 
     def check_events(self, events):
-        forbidden_rules = ['RDP over Reverse SSH Tunnel WFP', 'Suspicious Execution from Outlook']
-        for r in forbidden_rules:
-            if r in self.rules:
-                del self.rules[r]
+
+        all_alerts = []
         for event in events:
             alerts = parser.check_event(event, rules=self.rules)
             if self.callback:
                 for a in alerts:
                     self.callback(a, event)
-            else:
-                raise ValueError("There's no callback")
-            pass
+            all_alerts.extend(alerts)
+        return all_alerts
 
     def register_callback(self, c):
         self.callback = c
 
-
-
     @staticmethod
     def build_sysmon_events(logfile_path):
-        log_dict = parser.load_events(logfile_path)
+        log_dict = load_events(logfile_path)
+
         try:
             # handle single event
             if type(log_dict['Events']['Event']) is list:
