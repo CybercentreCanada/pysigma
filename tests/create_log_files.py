@@ -2,17 +2,13 @@ import os
 from pysigma.exceptions import UnsupportedFeature
 import logging
 import pysigma.pysigma as s
-import dicttoxml
+import xmltodict
 logger = logging.getLogger('logfiles')
 logger.setLevel('INFO')
 rules_path = os.path.join('../neo-sigma-master/sigma-master/rules/windows/sysmon')
 paths = []
 
-remove_words = ['count', 'min', 'max', 'sum', '(', ')', '|', 'by', 'count()', '<', '>', 'near']
-stop_words = ['and', 'or', 'not', 'OR', 'NOT', 'AND']
-all_words = remove_words + stop_words + ['of', '1', 'all', 'them', '(1']
-failed_rules = []
-multiple_condition_rules = []
+
 
 
 def get_rule_paths():
@@ -43,56 +39,47 @@ def add_rules(paths):
                     print(e, i)
                     continue
     return sigma
+# def get_condition(yaml_dict):
+#     try:
+#         condition = yaml_dict['detection']['condition']
+#         tokens = condition.split()
+#
+#     except AttributeError:
+#         logger.warning('multiple conditions not supported', yaml_dict['title'])
+#         multiple_condition_rules.append(condition)
+#     return condition
 
-
-def get_condition(yaml_dict):
-    try:
-        condition = yaml_dict['detection']['condition']
-        tokens = condition.split()
-
-    except AttributeError:
-        logger.warning('multiple conditions not supported', yaml_dict['title'])
-        multiple_condition_rules.append(condition)
-    return condition
-
-
-def clean_condition(condition):
-    keywords = []
-    for t in condition:
-        if t not in stop_words:
-            keywords.append(t)
-
-
-def simple_selection(words, yaml, ctr_single, ctr_mult):
-    if len(words) == 1:
-        ctr_single = ctr_single  + 1
-        selection = words[0]
-        relevant_section = yaml['detection'][selection]
-        print(selection, relevant_section)
-        return relevant_section, ctr_single
-    else:
-        print('More than 1 word', words)
-        return None, ctr_mult
-
-def create_xml(flat_events):
+def get_example_xml(flat_events):
     eventid = flat_events['EventID']
     with open("./eventid" + eventid) as fp:
         data = fp.read()
     return data
+
+def modify_xml(flat_events, example_xml):
+
+    converted_xml = xmltodict.parse(example_xml)
+    modified_xml = converted_xml
+    # assume all values are in EventData section
+    data_names = converted_xml['Event']['EventData']['Data']
+    for index, field in enumerate(data_names):
+        name = field['@Name']
+        if name in flat_events:
+            modified_xml['Event']['EventData']['Data'][index]['#text'] = flat_events[name]
+
+    return xmltodict.unparse(modified_xml)
+
 def main():
     frequencies = {new_list: 0 for new_list in range(20)}
     paths = get_rule_paths()
     parser = add_rules(paths)
-    ctr_single, ctr_mult = 0,0
     for sig_name, sig in parser.rules.items():
         print(sig_name)
         condition = sig.get_condition()
         generated_flat_event = condition(sig)
-        print(generated_flat_event)
-        xml = create_xml(generated_flat_event)
-        print(xml)
+        example_xml = get_example_xml(generated_flat_event)
+        modified_xml = modify_xml(generated_flat_event, example_xml)
+        print(modified_xml)
 
-    print(frequencies)
     print('number rules', len(paths))
 
 

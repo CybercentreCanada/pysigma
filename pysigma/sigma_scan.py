@@ -29,14 +29,12 @@ def create_pair( key, value: 'Query') -> bool:
         return None
 
     if isinstance(value, re.Pattern):
-        pat = value.pattern
         gen_regex = rstr.xeger(value)
         print(gen_regex)
         return {key:gen_regex}
     else:
         # Because by default sigma string matching is case insensitive, lower the event
         # string before comparing it. The value string is already lowercase.
-        # TODO potential optimization by caching lowercased event fields
         print('handle this')
         return None
 
