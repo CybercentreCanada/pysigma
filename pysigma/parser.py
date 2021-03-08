@@ -9,7 +9,7 @@ from lark import Lark, Transformer
 from .windows_event_logs import prepare_event_log
 from .build_alert import callback_buildReport, Alert, check_timeframe
 from .exceptions import UnsupportedFeature
-from .sigma_scan import analyze_x_of, match_search_id
+from .sigma_scan import analyze_x_of, gen_search_id
 
 
 # Grammar defined for the condition strings within the Sigma rules
@@ -120,8 +120,8 @@ class FactoryTransformer(Transformer):
     def search_id(args):
         name = args[0].value
 
-        def match_hits(signature, event):
-            return match_search_id(signature, event, name)
+        def match_hits(signature):
+            return gen_search_id(signature, name)
 
         return match_hits
 

@@ -1,17 +1,43 @@
 
 import fnmatch
 import re
+import rstr
 from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pysigma.signatures import DetectionField, DetectionMap, Query
 
 
-def match_search_id(signature, event, search_id):
+def gen_search_id(signature, search_id):
     search_fields = signature.get_search_fields(search_id)
     if search_fields:
-        return find_matches(event, search_fields)
+        return create_matches( search_fields)
     raise ValueError()
+
+def create_pair( key, value: 'Query') -> bool:
+    """
+    Given key and value from the rule, creates a pair that matches.
+    Takes into consideration any value modifiers.
+
+    :param key: str, given dict key
+    :param value: str, given key value
+    :return: event, dict, a single event from the event log
+    """
+    # Before we can apply modifiers and search properly, we need to check if there
+    # is even a value to modify, so do the null checks first
+    if value is None:
+        return None
+
+    if isinstance(value, re.Pattern):
+        pat = value.pattern
+        gen_regex = rstr.xeger(value)
+        print(gen_regex)
+        return {key:gen_regex}
+    else:
+        # Because by default sigma string matching is case insensitive, lower the event
+        # string before comparing it. The value string is already lowercase.
+        # TODO potential optimization by caching lowercased event fields
+        return str(event[key]).lower() == value
 
 
 def check_pair(event, key, value: 'Query') -> bool:
@@ -62,6 +88,42 @@ def find_matches(event: dict, search: 'DetectionField'):
 
     return False
 
+def create_matches(search: 'DetectionField'):
+    """
+    generates the items in the rule that would match. Iterates through the sections and if there's a list it iterates
+    through that. Uses checkPair to see if the items in the list/dictionary match items in the event log.
+
+
+    :param search: An object describing what sort of search to run
+    :return: event, dict, event that matches the given signature
+    """
+    if search.list_search:
+        for field in search.list_search:
+            for event_key in event:
+                if check_pair(event, event_key, field):
+                    return True
+        return False
+
+    for field in search.map_search:
+        # would this get all searches?
+        return create_matches_by_map(field)
+
+
+    return False
+
+
+def create_matches_by_map(search: 'DetectionMap'):
+    """
+
+    :param search: a dict of fields to search. All must be satisfied.
+    :return: dict, event
+    """
+
+    for field_name, (value, modifiers) in search.items():
+        if not create_matches_by_map_entry( field_name, value, modifiers):
+            return False
+    return True
+
 
 def find_matches_by_map(event: dict, search: 'DetectionMap'):
     """
@@ -97,7 +159,25 @@ def find_matches_by_map_entry(event: dict, field_name, field_values: 'List[Query
                 return True
         return False
 
+def create_matches_by_map_entry(field_name, field_values: 'List[Query]', modifiers: List[str]):
+    """
 
+    :param field_name: A field in the event we want to search
+    :param field_values: valid values or patterns for the field in question
+    :return: dict, event that natches values
+    """
+
+    # Normally any of the values in field_values is acceptable, but the all modifier inverts that
+    if 'all' in modifiers:
+        for permitted_value in field_values:
+            if not create_pair(field_name, permitted_value):
+                return False
+        return True
+    else:
+        for permitted_value in field_values:
+            if create_pair(field_name, permitted_value):
+                return True
+        return False
 # def find_all_matches(event, rule_dict):
 #     """
 #     Matches the items in the rule to the event. Iterates through the sections and if there's a list it iterates

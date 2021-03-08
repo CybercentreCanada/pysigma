@@ -1,10 +1,10 @@
 import os
-import yaml
+from pysigma.exceptions import UnsupportedFeature
 import logging
-
+import pysigma.pysigma as s
 logger = logging.getLogger('logfiles')
 logger.setLevel('INFO')
-rules_path = os.path.join('../neo-sigma-master/sigma-master/rules/windows')
+rules_path = os.path.join('../neo-sigma-master/sigma-master/rules/windows/sysmon')
 paths = []
 
 remove_words = ['count', 'min', 'max', 'sum', '(', ')', '|', 'by', 'count()', '<', '>', 'near']
@@ -29,21 +29,19 @@ def get_rule_paths():
     return paths
 
 
-def get_data(paths):
-    rule_yaml_dicts = []
+def add_rules(paths):
+    sigma = s.PySigma()
     for i in paths:
-        # print(f'File {i}')
-        with open(i) as y:
-            data = y.read()
-            try:
-                yaml_dict = yaml.safe_load(data)
-                rule_yaml_dicts.append(yaml_dict)
-            except yaml.composer.ComposerError as e:
-                failed_rules.append(i)
-                print('Multiple Documents not supported ', i)
-                # logger.error(e)
-                continue
-    return rule_yaml_dicts
+        if i == '../neo-sigma-master/sigma-master/rules/windows/sysmon/sysmon_apt_turla_namedpipes.yml':
+            with open(i) as y:
+                data = y.read()
+                try:
+                    sigma.add_signature(data)
+                except UnsupportedFeature as e:
+                    #failed_rules.append(i)
+                    print(e, i)
+                    continue
+    return sigma
 
 
 def get_condition(yaml_dict):
@@ -79,23 +77,12 @@ def simple_selection(words, yaml, ctr_single, ctr_mult):
 def main():
     frequencies = {new_list: 0 for new_list in range(20)}
     paths = get_rule_paths()
-    rule_yaml_dicts = get_data(paths)
+    parser = add_rules(paths)
     ctr_single, ctr_mult = 0,0
-    for yaml in rule_yaml_dicts:
-        keywords = []
-        condition = get_condition(yaml)
-        if isinstance(condition, list):
-            # iterate through all conditions
-            print('LOG', condition, yaml)
-            pass
-        elif isinstance(condition, str):
-            words = condition.split()
-            # goal here is to take words get the selections and each field and reconstruct the event log to create
-            # an mvp match, start with one selection
-            fields = simple_selection(words, yaml, ctr_single, ctr_mult)
-            if not fields:
-                continue
-
+    for sig_name, sig in parser.rules.items():
+        print(sig_name)
+        condition = sig.get_condition()
+        generated_match_event = condition(sig)
 
     print(frequencies)
     print('number rules', len(paths))
