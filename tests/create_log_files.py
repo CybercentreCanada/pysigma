@@ -2,6 +2,7 @@ import os
 from pysigma.exceptions import UnsupportedFeature
 import logging
 import pysigma.pysigma as s
+import dicttoxml
 logger = logging.getLogger('logfiles')
 logger.setLevel('INFO')
 rules_path = os.path.join('../neo-sigma-master/sigma-master/rules/windows/sysmon')
@@ -73,7 +74,11 @@ def simple_selection(words, yaml, ctr_single, ctr_mult):
         print('More than 1 word', words)
         return None, ctr_mult
 
-
+def create_xml(flat_events):
+    eventid = flat_events['EventID']
+    with open("./eventid" + eventid) as fp:
+        data = fp.read()
+    return data
 def main():
     frequencies = {new_list: 0 for new_list in range(20)}
     paths = get_rule_paths()
@@ -82,7 +87,10 @@ def main():
     for sig_name, sig in parser.rules.items():
         print(sig_name)
         condition = sig.get_condition()
-        generated_match_event = condition(sig)
+        generated_flat_event = condition(sig)
+        print(generated_flat_event)
+        xml = create_xml(generated_flat_event)
+        print(xml)
 
     print(frequencies)
     print('number rules', len(paths))

@@ -11,8 +11,8 @@ if TYPE_CHECKING:
 def gen_search_id(signature, search_id):
     search_fields = signature.get_search_fields(search_id)
     if search_fields:
-        return create_matches( search_fields)
-    raise ValueError()
+        return create_matches(search_fields)
+
 
 def create_pair( key, value: 'Query') -> bool:
     """
@@ -37,7 +37,8 @@ def create_pair( key, value: 'Query') -> bool:
         # Because by default sigma string matching is case insensitive, lower the event
         # string before comparing it. The value string is already lowercase.
         # TODO potential optimization by caching lowercased event fields
-        return str(event[key]).lower() == value
+        print('handle this')
+        return None
 
 
 def check_pair(event, key, value: 'Query') -> bool:
@@ -118,11 +119,12 @@ def create_matches_by_map(search: 'DetectionMap'):
     :param search: a dict of fields to search. All must be satisfied.
     :return: dict, event
     """
-
+    match_fields = {}
     for field_name, (value, modifiers) in search.items():
-        if not create_matches_by_map_entry( field_name, value, modifiers):
-            return False
-    return True
+        map_event = create_matches_by_map_entry( field_name, value, modifiers)
+        match_fields[field_name] = map_event[field_name]
+    return match_fields
+
 
 
 def find_matches_by_map(event: dict, search: 'DetectionMap'):
@@ -174,10 +176,9 @@ def create_matches_by_map_entry(field_name, field_values: 'List[Query]', modifie
                 return False
         return True
     else:
-        for permitted_value in field_values:
-            if create_pair(field_name, permitted_value):
-                return True
-        return False
+        generated_map_values = [create_pair(field_name, permitted_value) for permitted_value in field_values]
+        # just one of the values in list is sufficient to test rule
+        return generated_map_values[0]
 # def find_all_matches(event, rule_dict):
 #     """
 #     Matches the items in the rule to the event. Iterates through the sections and if there's a list it iterates
