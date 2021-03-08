@@ -1,0 +1,30 @@
+ <Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
+    <System>
+        <Provider Name="Microsoft-Windows-Sysmon" Guid="{5770385F-C22A-43E0-BF4C-06F5698FFBD9}" />
+        <EventID>10</EventID>
+        <Version>3</Version>
+        <Level>4</Level>
+        <Task>10</Task>
+        <Opcode>0</Opcode>
+        <Keywords>0x8000000000000000</Keywords>
+        <TimeCreated SystemTime="2017-05-15T00:02:01.824936300Z" />
+        <EventRecordID>1406</EventRecordID>
+        <Correlation />
+        <Execution ProcessID="6304" ThreadID="6360" />
+        <Channel>Microsoft-Windows-Sysmon/Operational</Channel>
+        <Computer>Ransom1</Computer>
+        <Security UserID="S-1-5-18" />
+    </System>
+    <EventData>
+        <Data Name="UtcTime">2017-05-15 00:02:01.463</Data>
+        <Data Name="SourceProcessGUID">{D49B2DE5-EFA6-5918-0000-00104D553C00}</Data>
+        <Data Name="SourceProcessId">4704</Data>
+        <Data Name="SourceThreadId">4124</Data>
+        <Data Name="SourceImage">C:\mimikatz\x64\mimikatz.exe</Data>
+        <Data Name="TargetProcessGUID">{D49B2DE5-E852-5918-0000-00100B0F0700}</Data>
+        <Data Name="TargetProcessId">1576</Data>
+        <Data Name="TargetImage">C:\Windows\system32\winlogon.exe</Data>
+        <Data Name="GrantedAccess">0x40</Data>
+        <Data Name="CallTrace">C:\Windows\SYSTEM32\ntdll.dll+a5594|C:\Windows\system32\KERNELBASE.dll+1e865|C:\mimikatz\x64\mimikatz.exe+77ad|C:\mimikatz\x64\mimikatz.exe+7759|C:\mimikatz\x64\mimikatz.exe+f095|C:\mimikatz\x64\mimikatz.exe+6610a|C:\mimikatz\x64\mimikatz.exe+65dc4|C:\mimikatz\x64\mimikatz.exe+4ac00|C:\mimikatz\x64\mimikatz.exe+4aa36|C:\mimikatz\x64\mimikatz.exe+4a81d|C:\mimikatz\x64\mimikatz.exe+6ebe5|C:\Windows\system32\KERNEL32.DLL+18102|C:\Windows\SYSTEM32\ntdll.dll+5c5b4</Data>
+    </EventData>
+</Event>

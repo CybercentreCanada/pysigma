@@ -1,0 +1,37 @@
+ <Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
+    <System>
+        <Provider Name="Microsoft-Windows-Sysmon" Guid="{5770385F-C22A-43E0-BF4C-06F5698FFBD9}" />
+        <EventID>1</EventID>
+        <Version>5</Version>
+        <Level>4</Level>
+        <Task>1</Task>
+        <Opcode>0</Opcode>
+        <Keywords>0x8000000000000000</Keywords>
+        <TimeCreated SystemTime="2017-04-28T22:08:22.025812200Z" />
+        <EventRecordID>9947</EventRecordID>
+        <Correlation />
+        <Execution ProcessID="3216" ThreadID="3964" />
+        <Channel>Microsoft-Windows-Sysmon/Operational</Channel>
+        <Computer>rfsH.lab.local</Computer>
+        <Security UserID="S-1-5-18" />
+    </System>
+    <EventData>
+        <Data Name="UtcTime">2017-04-28 22:08:22.025</Data>
+        <Data Name="ProcessGuid">{A23EAE89-BD56-5903-0000-0010E9D95E00}</Data>
+        <Data Name="ProcessId">6228</Data>
+        <Data Name="Image">C:\Program Files (x86)\Google\Chrome\Application\chrome.exe</Data>
+        <Data Name="CommandLine">"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" --type=utility --lang=en-US --no-sandbox --service-request-channel-token=F47498BBA884E523FA93E623C4569B94 --mojo-platform-channel-handle=3432 /prefetch:8</Data>
+        <Data Name="CurrentDirectory">C:\Program Files (x86)\Google\Chrome\Application\58.0.3029.81\</Data>
+        <Data Name="User">LAB\rsmith</Data>
+        <Data Name="LogonGuid">{A23EAE89-B357-5903-0000-002005EB0700}</Data>
+        <Data Name="LogonId">0x7eb05</Data>
+        <Data Name="TerminalSessionId">1</Data>
+        <Data Name="IntegrityLevel">Medium</Data>
+        <Data Name="Hashes">SHA256=6055A20CF7EC81843310AD37700FF67B2CF8CDE3DCE68D54BA42934177C10B57</Data>
+        <Data Name="ParentProcessGuid">{A23EAE89-BD28-5903-0000-00102F345D00}</Data>
+        <Data Name="ParentProcessId">13220</Data>
+        <Data Name="ParentImage">C:\Program Files (x86)\Google\Chrome\Application\chrome.exe</Data>
+        <Data Name="ParentCommandLine">"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" </Data>
+    </EventData>
+</Event>
+

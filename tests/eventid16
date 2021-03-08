@@ -1,0 +1,23 @@
+<Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
+    <System>
+        <Provider Name="Microsoft-Windows-Sysmon" Guid="{5770385F-C22A-43E0-BF4C-06F5698FFBD9}" />
+        <EventID>16</EventID>
+        <Version>3</Version>
+        <Level>4</Level>
+        <Task>16</Task>
+        <Opcode>0</Opcode>
+        <Keywords>0x8000000000000000</Keywords>
+        <TimeCreated SystemTime="2017-04-28T21:24:31.661858200Z" />
+        <EventRecordID>1</EventRecordID>
+        <Correlation />
+        <Execution ProcessID="32420" ThreadID="24524" />
+        <Channel>Microsoft-Windows-Sysmon/Operational</Channel>
+        <Computer>rfsH.lab.local</Computer>
+        <Security UserID="S-1-5-21-311908031-1195731464-1505490484-1605" />
+    </System>
+    <EventData>
+        <Data Name="UtcTime">2017-04-28 21:24:31.661</Data>
+        <Data Name="Configuration">config.xml</Data>
+        <Data Name="ConfigurationFileHash">SHA1=MM93VR46DP26CC35JZ5AD4AI29DP9JL99JM43JF9</Data>
+    </EventData>
+</Event>
