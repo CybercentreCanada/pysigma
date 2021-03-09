@@ -108,7 +108,7 @@ def create_matches(search: 'DetectionField'):
         return create_matches_by_map(field)
 
 
-    return False
+    return None
 
 
 def create_matches_by_map(search: 'DetectionMap'):
@@ -118,9 +118,11 @@ def create_matches_by_map(search: 'DetectionMap'):
     :return: dict, event
     """
     match_fields = {}
+    # Multiple items might exist in search
     for field_name, (value, modifiers) in search.items():
         map_event = create_matches_by_map_entry( field_name, value, modifiers)
-        match_fields[field_name] = map_event[field_name]
+        if map_event is not None:
+            match_fields[field_name] = map_event[field_name]
     return match_fields
 
 
@@ -295,6 +297,39 @@ def analyze_x_of(signature, event, count, selector):
             return False
     return False
 
+def gen_analyze_x_of(signature, count, selector):
+    """
+    Gets 'x of' condition specified within the condition string of the rule and generates an event that satisfies it.
+
+    :param signature: Signature currently being applied
+    :param count: left side of the x of statement, either 1 or None (for all)
+    :param selector: right side of the x of statement, a pattern or None (for all)
+    :return: dict, event that satisfies 'x of' condition
+    """
+
+    # First we need to choose our set of fields based on our selector.
+    matches = {}
+    all_searches = signature.get_all_searches()
+
+    if selector is None:  # None indicates all.
+        matches = all_searches
+    else:
+        for search_id, search_fields in all_searches.items():
+            if fnmatch.fnmatch(search_id, selector):
+                matches[search_id] = search_fields
+
+    if count is None:
+        count = len(matches)
+
+    # Now that we have our searches to check, return all of matches
+    search_hits = 0
+    gen_matches = [create_matches(search_fields) for search_id, search_fields in matches.items() if create_matches(search_fields) ]
+    search_hits = len(gen_matches)
+    if search_hits >= count:
+        return gen_matches
+    else:
+        print('error matches not created')
+        return None
 
 
 

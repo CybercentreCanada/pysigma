@@ -29,7 +29,7 @@ def get_rule_paths():
 def add_rules(paths):
     sigma = s.PySigma()
     for i in paths:
-        if i == '../neo-sigma-master/sigma-master/rules/windows/sysmon/sysmon_apt_turla_namedpipes.yml':
+        if i == '../neo-sigma-master/sigma-master/rules/windows/sysmon/sysmon_ads_executable.yml':
             with open(i) as y:
                 data = y.read()
                 try:

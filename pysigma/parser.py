@@ -9,7 +9,7 @@ from lark import Lark, Transformer
 from .windows_event_logs import prepare_event_log
 from .build_alert import callback_buildReport, Alert, check_timeframe
 from .exceptions import UnsupportedFeature
-from .sigma_scan import analyze_x_of, gen_search_id
+from .sigma_scan import gen_analyze_x_of, gen_search_id
 
 
 # Grammar defined for the condition strings within the Sigma rules
@@ -155,10 +155,15 @@ class FactoryTransformer(Transformer):
             return args[0]
 
         def _and_operation(*state):
+            and_hits = {}
             for component in args:
-                if not component(*state):
-                    return False
-            return True
+                try:
+                    and_hits.update(component(*state))
+                except TypeError:
+                    pass
+                # if not component(*state):
+                #     return False
+            return and_hits
 
         return _and_operation
 
@@ -195,8 +200,8 @@ class FactoryTransformer(Transformer):
             selector = None
 
         # Create a closure on our
-        def _check_of_sections(signature, event):
-            return analyze_x_of(signature, event, count, selector)
+        def _check_of_sections(signature):
+            return gen_analyze_x_of(signature, count, selector)
         return _check_of_sections
 
     @staticmethod
