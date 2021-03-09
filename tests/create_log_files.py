@@ -29,7 +29,7 @@ def get_rule_paths():
 def add_rules(paths):
     sigma = s.PySigma()
     for i in paths:
-        if i == '../neo-sigma-master/sigma-master/rules/windows/sysmon/sysmon_ads_executable.yml':
+        if i == '../neo-sigma-master/sigma-master/rules/windows/sysmon/sysmon_cactustorch.yml':
             with open(i) as y:
                 data = y.read()
                 try:
@@ -65,6 +65,8 @@ def modify_xml(flat_events, example_xml):
         name = field['@Name']
         if name in flat_events:
             modified_xml['Event']['EventData']['Data'][index]['#text'] = flat_events[name]
+        else:
+            print('Not Modified Event: ', name)
 
     return xmltodict.unparse(modified_xml)
 
