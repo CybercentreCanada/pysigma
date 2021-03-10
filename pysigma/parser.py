@@ -143,7 +143,17 @@ class FactoryTransformer(Transformer):
             return value
 
         def _negate(*state):
-            return not value(*state)
+            event = value(*state)
+            print('negating ', event)
+            for k,v in event.items():
+                # negate value in dict
+                if v.isnumeric():
+                    event[k] = str(int(v) ^ 1)
+                elif str(v):
+                    event[k] = 'garbagestringthatdoesnotmatchanything'
+                else:
+                    print('error negating')
+            return event
         return _negate
 
     @staticmethod

@@ -1,5 +1,6 @@
 import os
 from pysigma.exceptions import UnsupportedFeature
+from collections import OrderedDict
 import logging
 import pysigma.pysigma as s
 import xmltodict
@@ -7,9 +8,6 @@ logger = logging.getLogger('logfiles')
 logger.setLevel('INFO')
 rules_path = os.path.join('../neo-sigma-master/sigma-master/rules/windows/sysmon')
 paths = []
-
-
-
 
 def get_rule_paths():
     for root, _, files in os.walk(rules_path):
@@ -29,25 +27,14 @@ def get_rule_paths():
 def add_rules(paths):
     sigma = s.PySigma()
     for i in paths:
-        if i == '../neo-sigma-master/sigma-master/rules/windows/sysmon/sysmon_cactustorch.yml':
-            with open(i) as y:
-                data = y.read()
-                try:
-                    sigma.add_signature(data)
-                except UnsupportedFeature as e:
-                    #failed_rules.append(i)
-                    print(e, i)
-                    continue
+        with open(i) as y:
+            try:
+                sigma.add_signature(y)
+            except UnsupportedFeature as e:
+                #failed_rules.append(i)
+                print(e, i)
+                continue
     return sigma
-# def get_condition(yaml_dict):
-#     try:
-#         condition = yaml_dict['detection']['condition']
-#         tokens = condition.split()
-#
-#     except AttributeError:
-#         logger.warning('multiple conditions not supported', yaml_dict['title'])
-#         multiple_condition_rules.append(condition)
-#     return condition
 
 def get_example_xml(flat_events):
     eventid = flat_events['EventID']
@@ -61,14 +48,34 @@ def modify_xml(flat_events, example_xml):
     modified_xml = converted_xml
     # assume all values are in EventData section
     data_names = converted_xml['Event']['EventData']['Data']
+
     for index, field in enumerate(data_names):
         name = field['@Name']
         if name in flat_events:
+            flat_events.pop(name)
+        try:
             modified_xml['Event']['EventData']['Data'][index]['#text'] = flat_events[name]
-        else:
-            print('Not Modified Event: ', name)
+        except KeyError as e:
+            pass
+            #print('error', e)
+    # add events that weren't already in xml, exclude eventid
+    if len(flat_events) != 1:
+        flat_events.pop('EventID')
+        for event in flat_events:
+            event_ordered_dict = OrderedDict([('@Name', event),
+                                              ('#text',flat_events[event]),
+                                              ])
+
+            modified_xml['Event']['EventData']['Data'].append(event_ordered_dict)
+
 
     return xmltodict.unparse(modified_xml)
+def create_xml_file(sig_name, xml_str):
+    xml_str = xml_str.split('\n')[1]
+    full_xml = "<Events> " + xml_str + "</Events>"
+    print(full_xml)
+    with open('./sysmon/'+sig_name, 'w') as fp:
+        fp.write(full_xml)
 
 def main():
     frequencies = {new_list: 0 for new_list in range(20)}
@@ -81,8 +88,11 @@ def main():
         example_xml = get_example_xml(generated_flat_event)
         modified_xml = modify_xml(generated_flat_event, example_xml)
         print(modified_xml)
+        file_name = sig.file_name.split('/')[-1][:-3] + "xml"
+        create_xml_file(file_name, modified_xml)
 
     print('number rules', len(paths))
+    print(os.getcwd())
 
 
 if __name__ == '__main__':

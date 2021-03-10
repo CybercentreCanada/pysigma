@@ -2,8 +2,9 @@
 import fnmatch
 import re
 import rstr
+import exrex
 from typing import List, TYPE_CHECKING
-
+import itertools
 if TYPE_CHECKING:
     from pysigma.signatures import DetectionField, DetectionMap, Query
 
@@ -29,9 +30,10 @@ def create_pair( key, value: 'Query') -> bool:
         return None
 
     if isinstance(value, re.Pattern):
-        gen_regex = rstr.xeger(value)
-        print(gen_regex)
-        return {key:gen_regex}
+        re_generated_str = rstr.xeger(value)
+        re_generated_str2 = next(exrex.generate(value.pattern, limit=20))
+        print('generated regex ', re_generated_str, re_generated_str2)
+        return {key:re_generated_str2}
     else:
         # Because by default sigma string matching is case insensitive, lower the event
         # string before comparing it. The value string is already lowercase.
@@ -68,7 +70,7 @@ def check_pair(event, key, value: 'Query') -> bool:
 def find_matches(event: dict, search: 'DetectionField'):
     """
     Matches the items in the rule to the event. Iterates through the sections and if there's a list it iterates
-    through that. Uses checkPair to see if the items in the list/dictionary match items in the event log.
+    through that. Uses create_pair to see if the items in the list/dictionary match items in the event log.
 
     :param event: dict, event read from the Sysmon log
     :param search: An object describin what sort of search to run
@@ -324,9 +326,11 @@ def gen_analyze_x_of(signature, count, selector):
     # Now that we have our searches to check, return all of matches
     search_hits = 0
     gen_matches = [create_matches(search_fields) for search_id, search_fields in matches.items() if create_matches(search_fields) ]
+    if len(gen_matches) > 1:
+        print("Warning multiple matches")
     search_hits = len(gen_matches)
     if search_hits >= count:
-        return gen_matches
+        return gen_matches[0]
     else:
         print('error matches not created')
         return None
