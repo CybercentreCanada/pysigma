@@ -21,4 +21,4 @@ share/python-wheels/
 MANIFEST
 neo-sigma-master.zip
 neo-sigma-master/
-
+.pytest*

@@ -37,7 +37,7 @@ detection:
 falsepositives:
     - Unknown
 level: critical"""
-logfile_path = os.path.abspath(os.path.join(os.path.dirname(__file__), './xml_example'))
+logfile_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'xml_example'))
 
 
 @pytest.fixture

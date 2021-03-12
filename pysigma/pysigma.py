@@ -4,7 +4,6 @@ import logging
 from yaml.composer import ComposerError
 
 from . import signatures
-from .exceptions import UnsupportedFeature
 from . import parser
 from .windows_event_logs import load_events
 

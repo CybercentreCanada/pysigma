@@ -1,7 +1,6 @@
 import os.path
 import shutil
 import urllib.request
-import traceback
 
 import pytest
 
@@ -10,7 +9,7 @@ from pysigma import load_events
 
 
 project_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-logfile_path = os.path.abspath(os.path.join(os.path.dirname(__file__), './xml_example'))
+logfile_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'xml_example'))
 
 
 def build_sysmon_events():
