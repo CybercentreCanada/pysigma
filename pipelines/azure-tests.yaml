@@ -27,7 +27,6 @@ jobs:
         sudo apt-get update
         cd $install_path
         sudo env "PATH=$PATH" python -m pip install -U -r `pwd`/test/requirements.txt
-        sudo rm -rf /tmp/* /var/lib/apt/lists/* ~/.cache/pip
       displayName: Setup environment
     - script: python -m pytest --durations=10 -rsx -vv --cov-report=xml --cov=pysigma
       displayName: Test
