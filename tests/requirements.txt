@@ -1,0 +1,7 @@
+codecov
+pytest-cov
+pytest
+lark-parser
+xmltodict
+PyYAML
+evtx

@@ -1,0 +1,31 @@
+<Events>
+    <Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
+        <System>
+            <Provider Guid="{5770385f-c22a-43e0-bf4c-06f5698ffbd9}" Name="Microsoft-Windows-Sysmon"></Provider>
+            <EventID>15</EventID>
+            <Version>2</Version>
+            <Level>4</Level>
+            <Task>15</Task>
+            <Opcode>0</Opcode>
+            <Keywords>0x8000000000000000</Keywords>
+            <TimeCreated SystemTime="2021-03-05T19:03:44.558088300Z"></TimeCreated>
+            <EventRecordID>478</EventRecordID>
+            <Correlation></Correlation>
+            <Execution ProcessID="5240" ThreadID="1172"></Execution>
+            <Channel>Microsoft-Windows-Sysmon/Operational</Channel>
+            <Computer>buddy-pc</Computer>
+            <Security UserID="S-1-5-18"></Security>
+        </System>
+        <EventData>
+            <Data Name="RuleName"></Data>
+            <Data Name="UtcTime">2021-03-05 19:03:44.556</Data>
+            <Data Name="ProcessGuid">{d16cb8c4-8086-6042-0000-0010175a6500}</Data>
+            <Data Name="ProcessId">472</Data>
+            <Data Name="Image">C:\Program Files (x86)\Microsoft Office\Office14\WINWORD.EXE</Data>
+            <Data Name="TargetFilename">C:\Users\buddy\AppData\Local\Temp\msals.pumpl</Data>
+            <Data Name="CreationUtcTime">2021-03-05 19:03:44.525</Data>
+            <Data Name="Hash">SHA1=7390A58DE7DE0C4B4F4AAF3618255415E4929297</Data>
+            <Data Name="Imphash">1</Data>
+        </EventData>
+    </Event>
+</Events>

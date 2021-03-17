@@ -3,11 +3,16 @@ import setuptools
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+with open('requirements.txt', 'r') as fh:
+    requirements = fh.readlines()
+
+
 setuptools.setup(
-    name="sigma_signature",
+    name="pysigma",
     version="0.0.3",
     description="A library for parsing sysmon logs against sigma rules",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=setuptools.find_packages()
+    packages=setuptools.find_packages(),
+    install_requires=requirements
 )
