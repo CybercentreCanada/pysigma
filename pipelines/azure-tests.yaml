@@ -26,7 +26,7 @@ jobs:
         install_path=`pwd`
         sudo apt-get update
         cd $install_path
-        sudo env "PATH=$PATH" python -m pip install -U -r `pwd`/test/requirements.txt
+        sudo env "PATH=$PATH" python -m pip install -U -r `pwd`/tests/requirements.txt
       displayName: Setup environment
     - script: python -m pytest --durations=10 -rsx -vv --cov-report=xml --cov=pysigma
       displayName: Test
