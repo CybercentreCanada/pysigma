@@ -38,7 +38,6 @@ class PySigma:
         parser.rules = self.rules
 
     def check_events(self, events):
-
         all_alerts = []
         for event in events:
             alerts = parser.check_event(event, rules=self.rules)
