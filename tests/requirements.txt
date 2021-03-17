@@ -1,5 +1,5 @@
 codecov
-pytests-cov
+pytest-cov
 pytest
 lark-parser
 xmltodict
