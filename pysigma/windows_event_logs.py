@@ -1,19 +1,30 @@
 from xml.parsers.expat import ExpatError
 from io import open
+from evtx import PyEvtxParser
 
+import json
 import collections
 import xmltodict
 
 
-def load_events(xml_file_name):
+def load_events(log_file_name):
     """
-    Opens Sysmon xml logs as a readable file, and turns the events into dictionaries
-    :param xml_file_name: Sysmon xml log to be opened
+    Opens Sysmon logs as a readable file, and turns the events into dictionaries
+    :param log_file_name: Sysmon evtx or xml log to be opened
     :return: dict of the Sysmon event log
     """
     try:
-        with open(xml_file_name, "r", encoding='utf-8', errors='ignore') as fp:
-            return xmltodict.parse(fp.read())
+        with open(log_file_name, "r", encoding='utf-8', errors='ignore') as fp:
+            magic = fp.read(7)
+            fp.seek(0)
+            if magic == 'ElfFile':
+                # log is evtx type
+                parser = PyEvtxParser(log_file_name)
+                dictrecords = [json.loads(rec['data']) for rec in parser.records_json()]
+                return dictrecords, 'evtx'
+            elif magic == '<Events':
+                return xmltodict.parse(fp.read()), 'xml'
+
     except ExpatError:
         raise KeyError("Error: Format error in the Event log file")
 
@@ -42,7 +53,9 @@ def convert_event_data_to_key_value(event_dict):
     :param event_dict: event
     :return: k,v Data section
     """
-
+    if not 'Data' in event_dict:
+        # then return evtx log unchanged
+        return event_dict
     tempdict = {}
     data = event_dict['Data']
     event_dict.update({'StartModule': None})

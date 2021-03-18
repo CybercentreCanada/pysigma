@@ -52,14 +52,17 @@ class PySigma:
 
     @staticmethod
     def build_sysmon_events(logfile_path):
-        log_dict = load_events(logfile_path)
+        log_dict, log_type = load_events(logfile_path)
 
         try:
             # handle single event
-            if type(log_dict['Events']['Event']) is list:
-                events = log_dict['Events']['Event']
-            else:
-                events = [log_dict['Events']['Event']]
+            if log_type == 'xml':
+                if type(log_dict['Events']['Event']) is list:
+                    events = log_dict['Events']['Event']
+                else:
+                    events = [log_dict['Events']['Event']]
+            elif log_type == 'evtx':
+                events = log_dict
         except KeyError:
             raise ValueError("The input file %s does not contain any events or is improperly formatted")
         return events
