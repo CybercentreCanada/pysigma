@@ -67,20 +67,6 @@ def test_init():
     assert sigma_parser.callback is None
 
 
-
-def build_sysmon_events():
-    log_dict = load_events(logfile_path)
-    try:
-        # handle single event
-        if type(log_dict['Events']['Event']) is list:
-            events = log_dict['Events']['Event']
-        else:
-            events = [log_dict['Events']['Event']]
-    except KeyError:
-        raise ValueError("The input file %s does not contain any events or is improperly formatted")
-    return events
-
-
 def check_events(self, events):
     for event in events:
         alerts = parser.check_event(event, rules=self.rules)
@@ -89,7 +75,7 @@ def check_events(self, events):
 
 
 def test_check_logfile(sigma_parser):
-    events = build_sysmon_events()
+    events = sigma_parser.build_sysmon_events(logfile_path)
     alerts = sigma_parser.check_events(events)
     assert alerts[0] == {'score': 'high', 'title': 'System File Execution Location Anomaly'}
 

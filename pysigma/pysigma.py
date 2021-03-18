@@ -53,7 +53,6 @@ class PySigma:
     @staticmethod
     def build_sysmon_events(logfile_path):
         log_dict, log_type = load_events(logfile_path)
-
         try:
             # handle single event
             if log_type == 'xml':

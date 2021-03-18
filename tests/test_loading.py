@@ -3,26 +3,9 @@ import shutil
 import urllib.request
 
 import pytest
-
 import pysigma
-from pysigma import load_events
-
-
 project_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 logfile_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'xml_example'))
-
-
-def build_sysmon_events():
-    log_dict = load_events(logfile_path)
-    try:
-        # handle single event
-        if type(log_dict['Events']['Event']) is list:
-            events = log_dict['Events']['Event']
-        else:
-            events = [log_dict['Events']['Event']]
-    except KeyError:
-        raise ValueError("The input file %s does not contain any events or is improperly formatted")
-    return events
 
 
 @pytest.fixture
@@ -85,8 +68,8 @@ def test_run_rules(upstream_rules):
                     processor.add_signature(handle)
             except pysigma.UnsupportedFeature:
                 pass
-
-    processor.check_events(build_sysmon_events())
+    events = processor.build_sysmon_events(logfile_path)
+    processor.check_events(events)
     print('unsupported', unsupported)
     assert len(processor.rules) > 600
 
