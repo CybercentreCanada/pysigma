@@ -64,6 +64,8 @@ class PySigma:
                 events = log_dict
         except KeyError:
             raise ValueError("The input file %s does not contain any events or is improperly formatted")
+        except TypeError:
+            raise ValueError("The input file %s does not contain any events or is improperly formatted")
         return events
 
     def check_logfile(self, logfile_path):

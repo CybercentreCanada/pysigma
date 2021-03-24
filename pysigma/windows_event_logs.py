@@ -24,6 +24,8 @@ def load_events(log_file_name):
                 return dictrecords, 'evtx'
             elif magic == '<Events':
                 return xmltodict.parse(fp.read()), 'xml'
+            else:
+                raise Exception('Invalid File magic')
 
     except ExpatError:
         raise KeyError("Error: Format error in the Event log file")
