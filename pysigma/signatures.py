@@ -197,10 +197,10 @@ class Signature:
                 self.level = segment['level']
             if 'tags' in segment:
                 self.tags = segment['tags']
-            if 'detection' in segment:
-                self.detections.append(Detection(segment))
             if 'id' in segment:
                 self.id = segment['id']
+            if 'detection' in segment:
+                self.detections.append(Detection(segment))
 
                 # The sigma spec repeatedly uses examples where the condition
                 # is in the wrong place relative to the rest of the standard

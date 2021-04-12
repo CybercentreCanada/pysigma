@@ -49,7 +49,7 @@ def sigma_parser():
 def test_add_signature(sigma_parser):
     rules = os.listdir(RULE_DIR)
     sigma_parser.add_signature(sample_rule_1)
-    assert 'DNS Tunnel Technique from MuddyWater' in sigma_parser.rules
+    assert '36222790-0d43-4fe8-86e4-674b27809543' in sigma_parser.rules
 
 
 def load_rule(sigma_parser):
