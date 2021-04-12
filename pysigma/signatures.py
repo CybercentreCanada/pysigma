@@ -210,7 +210,7 @@ class Signature:
         if len(self.detections) == 0:
             raise SignatureLoadError('detection')
         if len(self.detections) > 1:
-            raise UnsupportedFeature()
+            raise UnsupportedFeature('Multiple YAML documents unsupported (Multiple Detections)')
 
     def get_condition(self) -> Callable:
         return self.detections[0].condition
