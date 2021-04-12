@@ -186,6 +186,7 @@ class Signature:
         self.level = None
         self.tags = None
         self.detections = []
+        self.id = None
 
         for segment in data:
             if 'title' in segment:
@@ -198,6 +199,8 @@ class Signature:
                 self.tags = segment['tags']
             if 'detection' in segment:
                 self.detections.append(Detection(segment))
+            if 'id' in segment:
+                self.id = segment['id']
 
                 # The sigma spec repeatedly uses examples where the condition
                 # is in the wrong place relative to the rest of the standard

@@ -34,7 +34,7 @@ class PySigma:
 
     def add_signature(self, signature_file: typing.Union[typing.IO, str]):
         signature = signatures.load_signature(signature_file)
-        self.rules[signature.title] = signature
+        self.rules[signature.id] = signature
         parser.rules = self.rules
 
     def check_events(self, events):
