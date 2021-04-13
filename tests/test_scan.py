@@ -111,6 +111,7 @@ def test_escaped_wildcards():
     sigma = PySigma()
     sigma.add_signature(r"""
         title: literal_star
+        id: 1
         detection:
             field:
                 x: a\*a
@@ -118,6 +119,7 @@ def test_escaped_wildcards():
     """)
     sigma.add_signature(r"""
         title: literal_question
+        id: 2
         detection:
             field:
                 x: a\?a
@@ -125,6 +127,7 @@ def test_escaped_wildcards():
     """)
     sigma.add_signature("""
         title: star
+        id: 3
         detection:
             field:
                 x: a*a
@@ -132,6 +135,7 @@ def test_escaped_wildcards():
     """)
     sigma.add_signature("""
         title: question
+        id: 4
         detection:
             field:
                 x: a?a

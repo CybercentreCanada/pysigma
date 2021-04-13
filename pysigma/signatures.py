@@ -186,6 +186,7 @@ class Signature:
         self.level = None
         self.tags = None
         self.detections = []
+        self.id = None
 
         for segment in data:
             if 'title' in segment:
@@ -196,6 +197,8 @@ class Signature:
                 self.level = segment['level']
             if 'tags' in segment:
                 self.tags = segment['tags']
+            if 'id' in segment:
+                self.id = segment['id']
             if 'detection' in segment:
                 self.detections.append(Detection(segment))
 
