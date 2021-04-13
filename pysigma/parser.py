@@ -65,7 +65,7 @@ def check_event(raw_event, rules):
                 check_timeframe(rule_obj, rule_name, timed_events, event, alerts)
             else:
                 alert = Alert(rule_name, rule_obj.description, event, rule_obj.level,
-                              rule_obj.id, rule_obj.file_name )
+                              rule_obj.id, rule_obj.file_name)
                 callback_buildReport(alerts, alert)
     return alerts
 
