@@ -77,5 +77,8 @@ def check_events(self, events):
 def test_check_logfile(sigma_parser):
     events = sigma_parser.build_sysmon_events(logfile_path)
     alerts = sigma_parser.check_events(events)
-    assert alerts[0] == {'score': 'high', 'title': 'System File Execution Location Anomaly'}
+    assert alerts[0] == {'description': 'Detects a Windows program executable started in a suspicious folder',
+                         'id': 'e4a6b256-3e47-40fc-89d2-7a477edd6915',
+                         'score': 'high',
+                         'title': 'System File Execution Location Anomaly'}
 
