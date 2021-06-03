@@ -80,5 +80,6 @@ def test_check_logfile(sigma_parser):
     assert alerts[0] == {'description': 'Detects a Windows program executable started in a suspicious folder',
                          'id': 'e4a6b256-3e47-40fc-89d2-7a477edd6915',
                          'score': 'high',
+                         'signature_source': None,
                          'title': 'System File Execution Location Anomaly'}
 
