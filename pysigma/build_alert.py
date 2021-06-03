@@ -7,12 +7,13 @@ class Alert:
     Stores the rule title, filename, and description, event dict, and the rule level for scoring.
     """
 
-    def __init__(self, title, description, event, level, id, yaml_name):
+    def __init__(self, title, description, event, level, id, yaml_name, signature_source):
         self.title = title
         self.description = description
         self.event = event
         self.level = level
         self.id = id
+        self.signature_source = signature_source
 
 
 def callback_buildReport(alert_list, alert):
@@ -38,7 +39,7 @@ def callback_buildReport(alert_list, alert):
     else:
         score = 'null'
 
-    alertItem = {"score": score, "title": alert.title, "id": alert.id, "description": alert.description}
+    alertItem = {"score": score, "title": alert.title, "id": alert.id, "description": alert.description, "signature_source": alert.signature_source}
     alert_list.append(alertItem)
 
 

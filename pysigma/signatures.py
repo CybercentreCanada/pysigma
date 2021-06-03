@@ -187,6 +187,7 @@ class Signature:
         self.tags = None
         self.detections = []
         self.id = None
+        self.signature_source = None
 
         for segment in data:
             if 'title' in segment:
@@ -199,6 +200,8 @@ class Signature:
                 self.tags = segment['tags']
             if 'id' in segment:
                 self.id = segment['id']
+            if 'signature_source' in segment:
+                self.signature_source = segment['signature_source']
             if 'detection' in segment:
                 self.detections.append(Detection(segment))
 
@@ -210,6 +213,8 @@ class Signature:
 
         if self.title is None:
             raise SignatureLoadError('title')
+        #if self.signature_source is None:
+        #    raise SignatureLoadError('signature_source')
         if len(self.detections) == 0:
             raise SignatureLoadError('detection')
         if len(self.detections) > 1:
