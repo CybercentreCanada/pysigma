@@ -143,6 +143,7 @@ def normalize_field_map(field: Dict[str, Any]) -> DetectionMap:
                 ], modifiers
             else:
                 # if key already exists don't overwrite it.
+                modifiers.append('all')
                 out[key] = (out[key][0] + ([apply_modifiers(str(_v), modifiers) if _v is not None else None
                                 for _v in value]), out[key][1] + (modifiers))
                 # out[key].append([apply_modifiers(str(_v), modifiers) if _v is not None else None
@@ -152,7 +153,9 @@ def normalize_field_map(field: Dict[str, Any]) -> DetectionMap:
                 out[key] = [apply_modifiers(str(value), modifiers)], modifiers
             else:
                 # if key already exists don't overwrite it.
+                modifiers.append('all')
                 out[key] = (out[key][0] + ([apply_modifiers(str(value), modifiers)]), out[key][1] + (modifiers))
+
 
     return out
 

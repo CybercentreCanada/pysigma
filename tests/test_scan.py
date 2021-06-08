@@ -166,6 +166,7 @@ def test_regex_transform():
     assert sigma_string_to_regex(r'.\*abc\?').pattern == r'\.\*abc\?'
     assert sigma_string_to_regex(r'.\*abc\\?').pattern == r'\.\*abc\\.'
     assert sigma_string_to_regex(r'.\*abc\\\?').pattern == r'\.\*abc\\\\.'
+    #assert sigma_string_to_regex(r'*\abc\*').pattern == r'.*\abc\.*'
     assert sigma_string_to_regex(r'a\a').fullmatch(r'a\a')
     assert sigma_string_to_regex(r'a\\a').fullmatch(r'a\\a')
     assert sigma_string_to_regex(r'a\*a').fullmatch(r'a*a')
