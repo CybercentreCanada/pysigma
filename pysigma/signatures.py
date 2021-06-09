@@ -97,29 +97,29 @@ def apply_modifiers(value: str, modifiers: List[str]) -> Query:
     Apply as many modifiers as we can during signature construction
     to speed up the matching stage as much as possible.
     """
+
+    # If there are wildcards, or we are using the regex modifier, compile the query
+    # string to a regex pattern object
+    if 're' in modifiers:
+        value = re.compile(value)
+
+    if not ESCAPED_WILDCARD_PATTERN.fullmatch(value):
+        # Transform the unescaped wildcards to their regex equivalent
+        value = sigma_string_to_regex(value).pattern
     # Apply base64 encoding
     for mod in modifiers:
         if mod == 'base64':
             value = base64.encodebytes(value.encode()).decode()
         elif mod == 'contains':
-            value = '*' + value + '*'
+            value = '.*' + value + '.*'
         elif mod == 'endswith':
-            value = '*' + value
+            value = '.*' + value
         elif mod == 'startswith':
-            value = value + '*'
-
-    # If there are wildcards, or we are using the regex modifier, compile the query
-    # string to a regex pattern object
-    if 're' in modifiers:
-        return re.compile(value)
-
-    if not ESCAPED_WILDCARD_PATTERN.fullmatch(value):
-        # Transform the unescaped wildcards to their regex equivalent
-        return sigma_string_to_regex(value)
+            value = value + '.*'
 
     # If we are just doing a full string compare of a raw string, the comparison
     # is case-insensitive in sigma, so all direct string comparisons will be lowercase.
-    value = value.replace('\\*', '*').replace('\\?', '?')
+    value = str(value).replace('\\*', '*').replace('\\?', '?')
     return value.lower()
 
 
