@@ -91,6 +91,7 @@ def sigma_string_to_regex(original_value: str):
 
     return ''.join(full_content)  # Sigma strings are case insensitive
 
+
 def get_modified_value(value, modifiers) -> str:
     for mod in modifiers:
         if mod == 'base64':
@@ -102,6 +103,7 @@ def get_modified_value(value, modifiers) -> str:
         elif mod == 'startswith':
             value = value + '.*'
     return value
+
 
 def apply_modifiers(value: str, modifiers: List[str]) -> Query:
     """
@@ -135,10 +137,10 @@ def normalize_field_map(field: Dict[str, Any]) -> DetectionMap:
     for raw_key, value in field.items():
         key, modifiers = process_field_name(raw_key)
         if value is None:
-            out.append((key,([None], modifiers)))
+            out.append((key, ([None], modifiers)))
         elif isinstance(value, list):
-            out.append((key,([apply_modifiers(str(_v), modifiers) if _v is not None else None
-                for _v in value], modifiers)))
+            out.append((key, ([apply_modifiers(str(_v), modifiers) if _v is not None else None
+                        for _v in value], modifiers)))
         else:
             out.append((key, ([apply_modifiers(str(value), modifiers)], modifiers)))
     return out
