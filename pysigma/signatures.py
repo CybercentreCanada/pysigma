@@ -91,7 +91,7 @@ def sigma_string_to_regex(original_value: str):
 
     return re.compile(''.join(full_content), flags=re.IGNORECASE)  # Sigma strings are case insensitive
 
-def get_modified_value(value, modifiers, reg_pat=None) -> str:
+def get_modified_value(value, modifiers) -> str:
     for mod in modifiers:
         if mod == 'base64':
             value = base64.encodebytes(value.encode()).decode()
