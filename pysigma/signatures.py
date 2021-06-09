@@ -91,6 +91,17 @@ def sigma_string_to_regex(original_value: str):
 
     return re.compile(''.join(full_content), flags=re.IGNORECASE)  # Sigma strings are case insensitive
 
+def get_modified_value(value, modifiers, reg_pat=None) ->str:
+    for mod in modifiers:
+        if mod == 'base64':
+            value = base64.encodebytes(value.encode()).decode()
+        elif mod == 'contains':
+            value = '.*' + value + '.*'
+        elif mod == 'endswith':
+            value = '.*' + value
+        elif mod == 'startswith':
+            value = value + '.*'
+    return value
 
 def apply_modifiers(value: str, modifiers: List[str]) -> Query:
     """
@@ -101,22 +112,13 @@ def apply_modifiers(value: str, modifiers: List[str]) -> Query:
     # If there are wildcards, or we are using the regex modifier, compile the query
     # string to a regex pattern object
     if 're' in modifiers:
-        value = re.compile(value)
-
+        reg_value = re.compile(value)
     if not ESCAPED_WILDCARD_PATTERN.fullmatch(value):
         # Transform the unescaped wildcards to their regex equivalent
-        value = sigma_string_to_regex(value).pattern
-    # Apply base64 encoding
-    for mod in modifiers:
-        if mod == 'base64':
-            value = base64.encodebytes(value.encode()).decode()
-        elif mod == 'contains':
-            value = '.*' + value + '.*'
-        elif mod == 'endswith':
-            value = '.*' + value
-        elif mod == 'startswith':
-            value = value + '.*'
-
+        reg_value = sigma_string_to_regex(value)
+        value = get_modified_value(reg_value.pattern, modifiers)
+        return re.compile(value, re.IGNORECASE)
+    value = get_modified_value(value, modifiers)
     # If we are just doing a full string compare of a raw string, the comparison
     # is case-insensitive in sigma, so all direct string comparisons will be lowercase.
     value = str(value).replace('\\*', '*').replace('\\?', '?')
