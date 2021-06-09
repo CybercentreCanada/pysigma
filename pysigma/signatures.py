@@ -141,9 +141,6 @@ def normalize_field_map(field: Dict[str, Any]) -> DetectionMap:
                 for _v in value], modifiers)))
         else:
             out.append((key, ([apply_modifiers(str(value), modifiers)], modifiers)))
-
-
-
     return out
 
 
@@ -155,7 +152,6 @@ def normalize_field_block(name: str, field: Any) -> DetectionField:
         if all(isinstance(_x, dict) for _x in field):
             return DetectionField(map_search=[normalize_field_map(_x) for _x in field])
         return DetectionField(list_search=[apply_modifiers(str(_x), ['contains']) for _x in field])
-
     raise ValueError(f"Failed to parse selection field {name}: {field}")
 
 
@@ -175,7 +171,6 @@ class Detection:
         self.condition = None
         if 'condition' in detection:
             self.condition = prepare_condition(detection.pop('condition'))
-
         self.detection = normalize_detection(detection)
 
 
