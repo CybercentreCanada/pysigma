@@ -89,7 +89,7 @@ def sigma_string_to_regex(original_value: str):
         else:
             raise ValueError(f"Could not parse string matching pattern: {original_value}")
 
-    return re.compile(''.join(full_content), flags=re.IGNORECASE)  # Sigma strings are case insensitive
+    return ''.join(full_content)  # Sigma strings are case insensitive
 
 def get_modified_value(value, modifiers) -> str:
     for mod in modifiers:
@@ -115,7 +115,7 @@ def apply_modifiers(value: str, modifiers: List[str]) -> Query:
     if not ESCAPED_WILDCARD_PATTERN.fullmatch(value) or 're' in modifiers:
         # Transform the unescaped wildcards to their regex equivalent
         reg_value = sigma_string_to_regex(value)
-        value = get_modified_value(reg_value.pattern, modifiers)
+        value = get_modified_value(reg_value, modifiers)
         return re.compile(value, re.IGNORECASE)
     value = get_modified_value(value, modifiers)
     # If we are just doing a full string compare of a raw string, the comparison
