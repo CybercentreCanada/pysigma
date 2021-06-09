@@ -111,9 +111,8 @@ def apply_modifiers(value: str, modifiers: List[str]) -> Query:
 
     # If there are wildcards, or we are using the regex modifier, compile the query
     # string to a regex pattern object
-    if 're' in modifiers:
-        reg_value = re.compile(value)
-    if not ESCAPED_WILDCARD_PATTERN.fullmatch(value):
+
+    if not ESCAPED_WILDCARD_PATTERN.fullmatch(value) or 're' in modifiers:
         # Transform the unescaped wildcards to their regex equivalent
         reg_value = sigma_string_to_regex(value)
         value = get_modified_value(reg_value.pattern, modifiers)
@@ -148,8 +147,7 @@ def normalize_field_map(field: Dict[str, Any]) -> DetectionMap:
                 modifiers.append('all')
                 out[key] = (out[key][0] + ([apply_modifiers(str(_v), modifiers) if _v is not None else None
                                 for _v in value]), out[key][1] + (modifiers))
-                # out[key].append([apply_modifiers(str(_v), modifiers) if _v is not None else None
-                #                for _v in value], modifiers)
+
         else:
             if key not in out:
                 out[key] = [apply_modifiers(str(value), modifiers)], modifiers
