@@ -30,9 +30,9 @@ SUPPORTED_MODIFIERS = {
 
 
 Query = Optional[Union[str, re.Pattern]]
-DetectionMap = Dict[
+DetectionMap = List[Tuple[
     str,
-    Tuple[List[Query], List[str]]
+    Tuple[List[Query], List[str]]]
 ]
 
 
@@ -89,7 +89,20 @@ def sigma_string_to_regex(original_value: str):
         else:
             raise ValueError(f"Could not parse string matching pattern: {original_value}")
 
-    return re.compile(''.join(full_content), flags=re.IGNORECASE)  # Sigma strings are case insensitive
+    return ''.join(full_content)  # Sigma strings are case insensitive
+
+
+def get_modified_value(value, modifiers) -> str:
+    for mod in modifiers:
+        if mod == 'base64':
+            value = base64.encodebytes(value.encode()).decode()
+        elif mod == 'contains':
+            value = '.*' + value + '.*'
+        elif mod == 'endswith':
+            value = '.*' + value
+        elif mod == 'startswith':
+            value = value + '.*'
+    return value
 
 
 def apply_modifiers(value: str, modifiers: List[str]) -> Query:
@@ -97,29 +110,19 @@ def apply_modifiers(value: str, modifiers: List[str]) -> Query:
     Apply as many modifiers as we can during signature construction
     to speed up the matching stage as much as possible.
     """
-    # Apply base64 encoding
-    for mod in modifiers:
-        if mod == 'base64':
-            value = base64.encodebytes(value.encode()).decode()
-        elif mod == 'contains':
-            value = '*' + value + '*'
-        elif mod == 'endswith':
-            value = '*' + value
-        elif mod == 'startswith':
-            value = value + '*'
 
     # If there are wildcards, or we are using the regex modifier, compile the query
     # string to a regex pattern object
-    if 're' in modifiers:
-        return re.compile(value)
 
-    if not ESCAPED_WILDCARD_PATTERN.fullmatch(value):
+    if not ESCAPED_WILDCARD_PATTERN.fullmatch(value) or 're' in modifiers:
         # Transform the unescaped wildcards to their regex equivalent
-        return sigma_string_to_regex(value)
-
+        reg_value = sigma_string_to_regex(value)
+        value = get_modified_value(reg_value, modifiers)
+        return re.compile(value, re.IGNORECASE)
+    value = get_modified_value(value, modifiers)
     # If we are just doing a full string compare of a raw string, the comparison
     # is case-insensitive in sigma, so all direct string comparisons will be lowercase.
-    value = value.replace('\\*', '*').replace('\\?', '?')
+    value = str(value).replace('\\*', '*').replace('\\?', '?')
     return value.lower()
 
 
@@ -130,19 +133,16 @@ class DetectionField:
 
 
 def normalize_field_map(field: Dict[str, Any]) -> DetectionMap:
-    out: DetectionMap = {}
+    out: DetectionMap = []
     for raw_key, value in field.items():
         key, modifiers = process_field_name(raw_key)
         if value is None:
-            out[key] = [None], modifiers
+            out.append((key, ([None], modifiers)))
         elif isinstance(value, list):
-            out[key] = [
-                apply_modifiers(str(_v), modifiers) if _v is not None else None
-                for _v in value
-            ], modifiers
+            out.append((key, ([apply_modifiers(str(_v), modifiers) if _v is not None else None
+                        for _v in value], modifiers)))
         else:
-            out[key] = [apply_modifiers(str(value), modifiers)], modifiers
-
+            out.append((key, ([apply_modifiers(str(value), modifiers)], modifiers)))
     return out
 
 
@@ -154,7 +154,6 @@ def normalize_field_block(name: str, field: Any) -> DetectionField:
         if all(isinstance(_x, dict) for _x in field):
             return DetectionField(map_search=[normalize_field_map(_x) for _x in field])
         return DetectionField(list_search=[apply_modifiers(str(_x), ['contains']) for _x in field])
-
     raise ValueError(f"Failed to parse selection field {name}: {field}")
 
 
@@ -174,7 +173,6 @@ class Detection:
         self.condition = None
         if 'condition' in detection:
             self.condition = prepare_condition(detection.pop('condition'))
-
         self.detection = normalize_detection(detection)
 
 

@@ -71,7 +71,7 @@ def find_matches_by_map(event: dict, search: 'DetectionMap'):
     :return:
     """
 
-    for field_name, (value, modifiers) in search.items():
+    for field_name, (value, modifiers) in search:
         if not find_matches_by_map_entry(event, field_name, value, modifiers):
             return False
     return True
