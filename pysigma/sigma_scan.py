@@ -51,18 +51,11 @@ def find_matches(event: dict, search: 'DetectionField', match_all: bool = False)
     :return: bool, whether or not we found a match
     """
     if search.list_search:
-        num_of_current_hits = 0
-        num_of_hits_required = len(search.list_search)
-        for field in search.list_search:
-            for event_key in event:
-                if check_pair(event, event_key, field):
-                    if not match_all:
-                        return True
-                    else:
-                        num_of_current_hits += 1
-        if match_all and num_of_current_hits >= num_of_hits_required:
-            return True
-        return False
+        check = all if match_all else any
+        return check(
+            any(check_pair(event, event_key, field) for event_key in event)
+            for field in search.list_search
+        )
 
     for field in search.map_search:
         if find_matches_by_map(event, field):
