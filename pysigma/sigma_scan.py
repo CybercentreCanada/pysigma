@@ -40,21 +40,22 @@ def check_pair(event, key, value: 'Query') -> bool:
         return str(event[key]).lower() == value
 
 
-def find_matches(event: dict, search: 'DetectionField'):
+def find_matches(event: dict, search: 'DetectionField', match_all: bool = False):
     """
     Matches the items in the rule to the event. Iterates through the sections and if there's a list it iterates
     through that. Uses checkPair to see if the items in the list/dictionary match items in the event log.
 
     :param event: dict, event read from the Sysmon log
-    :param search: An object describin what sort of search to run
+    :param search: An object describing what sort of search to run
+    :param match_all: A bool indicating if we want all fields in list to hit
     :return: bool, whether or not we found a match
     """
     if search.list_search:
-        for field in search.list_search:
-            for event_key in event:
-                if check_pair(event, event_key, field):
-                    return True
-        return False
+        check = all if match_all else any
+        return check(
+            any(check_pair(event, event_key, field) for event_key in event)
+            for field in search.list_search
+        )
 
     for field in search.map_search:
         if find_matches_by_map(event, field):
@@ -195,7 +196,9 @@ def analyze_x_of(signature, event, count, selector):
             if fnmatch.fnmatch(search_id, selector):
                 matches[search_id] = search_fields
 
+    match_all = False
     if count is None:
+        match_all = True
         count = len(matches)
     permitted_misses = len(matches) - count
 
@@ -203,7 +206,7 @@ def analyze_x_of(signature, event, count, selector):
     search_hits = 0
     search_misses = 0
     for search_id, search_fields in matches.items():
-        if find_matches(event, search_fields):
+        if find_matches(event, search_fields, match_all):
             search_hits += 1
         else:
             search_misses += 1
