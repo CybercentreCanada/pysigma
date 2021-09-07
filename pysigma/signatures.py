@@ -167,7 +167,7 @@ def normalize_detection(detection: Dict[str, Any]) -> Dict[str, DetectionField]:
 class Detection:
     def __init__(self, data):
         detection = data['detection']
-        self.logsource = data.get('logsource')
+        self.logsource = data.get('logsource', {})
         self.timeframe = detection.pop('timeframe', None)
 
         self.condition = None
@@ -229,6 +229,9 @@ class Signature:
 
     def get_timeframe(self):
         return self.detections[0].timeframe
+
+    def get_logsource(self):
+        return self.detections[0].logsource
 
 
 def load_signatures(signature_dir) -> Dict[str, Signature]:
