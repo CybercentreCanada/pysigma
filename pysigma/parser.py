@@ -2,7 +2,7 @@
 This parser uses lark to transform the condition strings from signatures into callbacks that
 invoke the right sequence of searches into the rule and logic operations.
 """
-from typing import Callable, Union
+from typing import Callable, Union, Dict, Any
 
 from lark import Lark, Transformer
 
@@ -56,6 +56,10 @@ def check_event(raw_event, rules):
     alerts = []
     timed_events = []
 
+    event_channel = event.get("Channel")
+    if event_channel:
+        rules = _get_relevant_rules(event_channel.lower(), rules)
+
     for rule_id, rule_obj in rules.items():
         condition = rule_obj.get_condition()
         rule_name = rule_obj.title
@@ -68,6 +72,26 @@ def check_event(raw_event, rules):
                               rule_obj.id, rule_obj.file_name, rule_obj.signature_source)
                 callback_buildReport(alerts, alert)
     return alerts
+
+
+def _get_relevant_rules(channel: str, rules: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    This method grabs a subset of the Sigma rules that are relevant to the event
+    https://github.com/SigmaHQ/sigma/wiki/Specification#log-source
+    :param channel: The channel in which the EVTX event was generated
+    :param rules: All Sigma rules
+    :return: A subset of relevant Sigma rules for the channel
+    """
+    relevant_rules: Dict[str, Any] = {}
+    for id, signature in rules.items():
+        logsource = signature.get_logsource()
+        product = logsource.get("product")
+        service = logsource.get("service")
+        # Not sure if this is the best way to find out if the rule is relevant to the event...
+        if (product and product.lower() not in channel) or (service and service.lower() not in channel):
+            continue
+        relevant_rules[id] = signature
+    return relevant_rules
 
 #
 # def parse_logfiles(*logfiles):
