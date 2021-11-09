@@ -9,10 +9,14 @@ with open('requirements.txt', 'r') as fh:
 
 setuptools.setup(
     name="pysigma",
-    version="0.0.3",
+    version="0.0.4",
     description="A library for parsing sysmon logs against sigma rules",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
-    install_requires=requirements
+    install_requires=requirements,
+    entry_points="""
+    [console_scripts]
+    sigma-validate=pysigma.validator_cli:main
+    """
 )
