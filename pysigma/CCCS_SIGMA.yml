@@ -1,0 +1,35 @@
+title:
+   description: "Title of sigma rule"
+   format: "str"
+   unique: No
+   optional: No
+
+id:
+   description: "Unique identifier"
+   format: "UUID version 4"
+   unique: Yes
+   optional: No
+
+first_imported:
+   description: "Date stamp of when the rule was added"
+   format: "YYYY/MM/DD"
+   unique: Yes
+   optional: No
+
+sharing:
+   description: "Sharing limitation"
+   format: "uppercase"
+   unique: Yes
+   optional: No
+
+source:
+   description: "Source organization of the SIGMA rule"
+   format: "str"
+   unique: Yes
+   optional: No
+
+reference:
+   description: "Reference for the rule i.e. weblink, report, individual, tweet etc."
+   format: "unvalidated"
+   unique: No
+   optional: Yes
