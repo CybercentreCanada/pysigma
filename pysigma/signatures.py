@@ -97,11 +97,11 @@ def get_modified_value(value, modifiers) -> str:
         if mod == 'base64':
             value = base64.encodebytes(value.encode()).decode()
         elif mod == 'contains':
-            value = '.*' + value + '.*'
+            value = f'.*{value}.*'
         elif mod == 'endswith':
-            value = '.*' + value
+            value = f'.*{value}$'
         elif mod == 'startswith':
-            value = value + '.*'
+            value = f'^{value}.*'
     return value
 
 
@@ -211,7 +211,7 @@ class Signature:
 
         if self.title is None:
             raise SignatureLoadError('title')
-        #if self.signature_source is None:
+        # if self.signature_source is None:
         #    raise SignatureLoadError('signature_source')
         if len(self.detections) == 0:
             raise SignatureLoadError('detection')
