@@ -86,6 +86,9 @@ def _get_relevant_rules(event: dict, rules: Dict[str, Any]) -> Dict[str, Any]:
         for product, category_spec in PRODUCT_CATEGORY_MAPPING.items():
             if product in channel:
                 for category, conditions in category_spec.items():
+                    # Can't trust verifying against categories with no conditions (ambiguous)
+                    if not conditions:
+                        continue
                     condition_valid = True
                     for c_name, c_value in conditions.items():
                         if isinstance(c_value, int):
@@ -97,7 +100,7 @@ def _get_relevant_rules(event: dict, rules: Dict[str, Any]) -> Dict[str, Any]:
         return None
 
     if not event.get("Channel"):
-        return {}
+        return rules
 
     channel = event.get("Channel").lower()
     event_category = get_category(event)
