@@ -96,6 +96,9 @@ def _get_relevant_rules(event: dict, rules: Dict[str, Any]) -> Dict[str, Any]:
                         return category
         return None
 
+    if not event.get("Channel"):
+        return {}
+
     channel = event.get("Channel").lower()
     event_category = get_category(event)
 
