@@ -71,3 +71,4 @@ class PySigma:
     def check_logfile(self, logfile_path):
         events = self.build_sysmon_events(logfile_path)
         self.check_events(events)
+        return events

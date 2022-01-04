@@ -2,39 +2,39 @@
 This parser uses lark to transform the condition strings from signatures into callbacks that
 invoke the right sequence of searches into the rule and logic operations.
 """
-from typing import Callable, Union, Dict, Any
+from typing import Any, Callable, Dict, Union
 
 from lark import Lark, Transformer
 
-from .windows_event_logs import prepare_event_log
-from .build_alert import callback_buildReport, Alert, check_timeframe
+from .build_alert import Alert, callback_buildReport, check_timeframe
 from .exceptions import UnsupportedFeature
+from .sigma_configuration import PRODUCT_CATEGORY_MAPPING
 from .sigma_scan import analyze_x_of, match_search_id
-
+from .windows_event_logs import prepare_event_log
 
 # Grammar defined for the condition strings within the Sigma rules
 grammar = '''
-        start: pipe_rule 
+        start: pipe_rule
         %import common.WORD   // imports from terminal library
         %ignore " "           // Disregard spaces in text
-        pipe_rule: or_rule ["|" aggregation_expression] 
-        or_rule: and_rule (("or"|"OR") and_rule)* 
-        and_rule: not_rule (("and"|"AND") not_rule)* 
-        not_rule: [not] atom 
+        pipe_rule: or_rule ["|" aggregation_expression]
+        or_rule: and_rule (("or"|"OR") and_rule)*
+        and_rule: not_rule (("and"|"AND") not_rule)*
+        not_rule: [not] atom
         not: "NOT" | "not"
         atom: x_of | search_id | "(" pipe_rule ")"
-        search_id: SEARCH_ID 
+        search_id: SEARCH_ID
         x: ALL | NUMBER
         x_of: x OF search_pattern
         search_pattern: /[a-zA-Z*_][a-zA-Z0-9*_]*/
-        aggregation_expression: aggregation_function "(" [aggregation_field] ")" [ "by" group_field ] comparison_op value 
+        aggregation_expression: aggregation_function "(" [aggregation_field] ")" [ "by" group_field ] comparison_op value
                               | near_aggregation
         aggregation_function: COUNT | MIN | MAX | AVG | SUM
         near_aggregation: "near" or_rule
         aggregation_field: SEARCH_ID
         group_field: SEARCH_ID
         comparison_op: GT | LT | EQ
-        GT: ">" 
+        GT: ">"
         LT: "<"
         EQ: "="
         value: NUMBER
@@ -56,9 +56,7 @@ def check_event(raw_event, rules):
     alerts = []
     timed_events = []
 
-    event_channel = event.get("Channel")
-    if event_channel:
-        rules = _get_relevant_rules(event_channel.lower(), rules)
+    rules = _get_relevant_rules(event, rules)
 
     for rule_id, rule_obj in rules.items():
         condition = rule_obj.get_condition()
@@ -74,7 +72,7 @@ def check_event(raw_event, rules):
     return alerts
 
 
-def _get_relevant_rules(channel: str, rules: Dict[str, Any]) -> Dict[str, Any]:
+def _get_relevant_rules(event: dict, rules: Dict[str, Any]) -> Dict[str, Any]:
     """
     This method grabs a subset of the Sigma rules that are relevant to the event
     https://github.com/SigmaHQ/sigma/wiki/Specification#log-source
@@ -82,15 +80,44 @@ def _get_relevant_rules(channel: str, rules: Dict[str, Any]) -> Dict[str, Any]:
     :param rules: All Sigma rules
     :return: A subset of relevant Sigma rules for the channel
     """
+
+    def get_category(event):
+        channel = event.get("Channel").lower()
+        for product, category_spec in PRODUCT_CATEGORY_MAPPING.items():
+            if product in channel:
+                for category, conditions in category_spec.items():
+                    # Can't trust verifying against categories with no conditions (ambiguous)
+                    if not conditions:
+                        continue
+                    condition_valid = True
+                    for c_name, c_value in conditions.items():
+                        if isinstance(c_value, int):
+                            condition_valid = condition_valid & (event.get(c_name) == c_value)
+                        else:
+                            condition_valid = condition_valid & bool(event.get(c_name) and event.get(c_name) in c_value)
+                    if condition_valid:
+                        return category
+        return None
+
+    if not event.get("Channel"):
+        return rules
+
+    channel = event.get("Channel").lower()
+    event_category = get_category(event)
+
     relevant_rules: Dict[str, Any] = {}
     for id, signature in rules.items():
         logsource = signature.get_logsource()
-        product = logsource.get("product")
-        service = logsource.get("service")
-        # Not sure if this is the best way to find out if the rule is relevant to the event...
-        if (product and product.lower() not in channel) or (service and service.lower() not in channel):
+        prefilter_items = [logsource.get("product"),
+                           logsource.get("service"),
+                           ]
+        if event_category and not event_category.startswith(str(logsource.get('category'))):
             continue
+        if any(element.lower() not in channel for element in prefilter_items if element):
+            continue
+
         relevant_rules[id] = signature
+
     return relevant_rules
 
 #
