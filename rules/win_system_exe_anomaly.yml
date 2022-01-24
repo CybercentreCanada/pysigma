@@ -47,7 +47,7 @@ detection:
             - 'C:\Windows\winsxs\\*'
             - 'C:\Windows\WinSxS\\*'
             - '\SystemRoot\System32\\*'
-    condition: not selection and not filter
+    condition: selection and not filter
 fields:
     - ComputerName
     - User

@@ -64,7 +64,7 @@ def test_init():
     # initialize pysigma
     sigma_parser = PySigma()
     assert sigma_parser.rules == {}
-    assert sigma_parser.callback is None
+    assert sigma_parser.callback is not None
 
 
 def check_events(self, events):
@@ -82,4 +82,3 @@ def test_check_logfile(sigma_parser):
                          'score': 'high',
                          'signature_source': None,
                          'title': 'System File Execution Location Anomaly'}
-
