@@ -40,7 +40,7 @@ with TemporaryDirectory() as clone_dir:
 
 setuptools.setup(
     name="pysigma",
-    version="0.0.5",
+    version="0.0.6",
     description="A library for parsing sysmon logs against sigma rules",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -49,5 +49,6 @@ setuptools.setup(
     entry_points="""
     [console_scripts]
     sigma-validate=pysigma.validator_cli:main
+    sigma-check=pysigma.pysigma:main
     """
 )
