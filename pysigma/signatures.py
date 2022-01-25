@@ -28,6 +28,12 @@ SUPPORTED_MODIFIERS = {
     # 're',
 }
 
+MODIFIER_FUNCTIONS = {
+    'contains': lambda x: f'.*{x}.*',
+    'base64': lambda x: base64.encodebytes(x.encode()).decode(),
+    'endswith': lambda x: f'.*{x}$',
+    'startswith': lambda x: f'^{x}.*',
+}
 
 Query = Optional[Union[str, re.Pattern]]
 DetectionMap = List[Tuple[
@@ -93,15 +99,13 @@ def sigma_string_to_regex(original_value: str):
 
 
 def get_modified_value(value, modifiers) -> str:
-    for mod in modifiers:
-        if mod == 'base64':
-            value = base64.encodebytes(value.encode()).decode()
-        elif mod == 'contains':
-            value = f'.*{value}.*'
-        elif mod == 'endswith':
-            value = f'.*{value}$'
-        elif mod == 'startswith':
-            value = f'^{value}.*'
+    if modifiers:
+        for mod in modifiers:
+            func = MODIFIER_FUNCTIONS[mod]
+            value = func(value) if func else value
+    else:
+        # If there are not modifiers, we assume exact match
+        value = f'^{value}$'
     return value
 
 
