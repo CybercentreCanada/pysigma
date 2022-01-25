@@ -101,10 +101,10 @@ def sigma_string_to_regex(original_value: str):
 def get_modified_value(value, modifiers) -> str:
     if modifiers:
         for mod in modifiers:
-            func = MODIFIER_FUNCTIONS[mod]
+            func = MODIFIER_FUNCTIONS.get(mod)
             value = func(value) if func else value
     else:
-        # If there are not modifiers, we assume exact match
+        # If there are no modifiers, we assume exact match
         value = f'^{value}$'
     return value
 
