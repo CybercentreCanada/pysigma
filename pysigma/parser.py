@@ -91,10 +91,16 @@ def _get_relevant_rules(event: dict, rules: Dict[str, Any]) -> Dict[str, Any]:
                         continue
                     condition_valid = True
                     for c_name, c_value in conditions.items():
+
+                        # If the event doesn't contain the condition params, ignore it
+                        if not event.get(c_name):
+                            condition_valid = False
+                            break
+
                         if isinstance(c_value, int):
-                            condition_valid = condition_valid & (int(event.get(c_name)) == c_value)
+                            condition_valid = condition_valid & int(event[c_name]) == c_value
                         else:
-                            condition_valid = condition_valid & bool(event.get(c_name) and event.get(c_name) in c_value)
+                            condition_valid=condition_valid & event[c_name] in c_value
                     if condition_valid:
                         return category
         return None
