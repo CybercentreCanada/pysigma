@@ -113,6 +113,11 @@ PRODUCT_CATEGORY_MAPPING = {
     "rails": {
         "application-rails": {}
     },
+    "rpc_firewall": {
+        "windows-rpc-firewall": {
+            "source": "WinEventLog:RPCFW"
+        }
+    },
     "ruby_on_rails": {
         "ruby_on_rails": {
             "categoryDeviceGroup": "/Application",

@@ -92,7 +92,7 @@ def _get_relevant_rules(event: dict, rules: Dict[str, Any]) -> Dict[str, Any]:
                     condition_valid = True
                     for c_name, c_value in conditions.items():
                         if isinstance(c_value, int):
-                            condition_valid = condition_valid & (event.get(c_name) == c_value)
+                            condition_valid = condition_valid & (int(event.get(c_name)) == c_value)
                         else:
                             condition_valid = condition_valid & bool(event.get(c_name) and event.get(c_name) in c_value)
                     if condition_valid:

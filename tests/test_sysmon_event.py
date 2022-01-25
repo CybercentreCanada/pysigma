@@ -4,7 +4,7 @@ Find way to validate that events are hitting on the right rules
 import os
 import os.path
 import pytest
-from pysigma import PySigma, parser, load_events
+from pysigma import PySigma, parser
 
 
 RULE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../rules'))
