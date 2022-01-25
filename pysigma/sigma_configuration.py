@@ -1,15 +1,13 @@
 PRODUCT_CATEGORY_MAPPING = {
     "antivirus": {
         "antivirus": {
-            "vendor_type": "Antivirus"
+            "categoryDeviceGroup": "/IDS/Host/AntiVirus"
         }
     },
     "apache": {
         "apache": {
-            "product_name": [
-                "apache*",
-                "httpd*"
-            ]
+            "categoryDeviceGroup": "/Application",
+            "deviceProduct": "Apache"
         },
         "apache2": {}
     },
@@ -24,9 +22,7 @@ PRODUCT_CATEGORY_MAPPING = {
         }
     },
     "cisco": {
-        "cisco": {
-            "vendor_name": "Cisco"
-        }
+        "cisco": {}
     },
     "django": {
         "application-django": {},
@@ -54,16 +50,15 @@ PRODUCT_CATEGORY_MAPPING = {
         "ipfix": {}
     },
     "linux": {
-        "linux": {},
-        "linux-auth": {
-            "device.class": "rhlinux"
+        "linux": {
+            "deviceVendor": "Unix"
         },
+        "linux-auth": {},
         "linux-clamav": {
-            "device.class": "rhlinux"
+            "deviceVendor": "Unix"
         },
         "linux-sshd": {
-            "client": "sshd",
-            "device.class": "rhlinux"
+            "deviceVendor": "Unix"
         },
         "linux-syslog": {},
         "linux-vsftpd": {
@@ -118,6 +113,11 @@ PRODUCT_CATEGORY_MAPPING = {
     "rails": {
         "application-rails": {}
     },
+    "rpc_firewall": {
+        "windows-rpc-firewall": {
+            "source": "WinEventLog:RPCFW"
+        }
+    },
     "ruby_on_rails": {
         "ruby_on_rails": {
             "categoryDeviceGroup": "/Application",
@@ -127,7 +127,8 @@ PRODUCT_CATEGORY_MAPPING = {
     "spring": {
         "application-spring": {},
         "spring": {
-            "vendor_name": "Spring"
+            "categoryDeviceGroup": "/Application",
+            "deviceProduct": "Spring"
         }
     },
     "sql": {
@@ -195,11 +196,9 @@ PRODUCT_CATEGORY_MAPPING = {
             "EventID": 10
         },
         "process_creation": {
-            "EventID": 4688
-        },
-        "process_creation_1": {
             "EventID": 1
         },
+        "process_creation_1": {},
         "process_creation_2": {
             "EventID": 4688
         },
@@ -228,10 +227,10 @@ PRODUCT_CATEGORY_MAPPING = {
             "EventID": 9
         },
         "registry_event": {
-            "EventID": 4657,
-            "OperationType": [
-                "New registry value created",
-                "Existing registry value modified"
+            "EventID": [
+                12,
+                13,
+                14
             ]
         },
         "registry_event1": {
@@ -258,18 +257,19 @@ PRODUCT_CATEGORY_MAPPING = {
         "sysmon_status2": {
             "EventID": 16
         },
-        "windows": {
-            "vendor_name": "Microsoft"
-        },
+        "windows": {},
         "windows-app": {
             "deviceVendor": "Microsoft"
         },
         "windows-application": {
-            "product_name": "Application"
+            "Channel": "Application"
         },
         "windows-applocker": {
-            "product_name": [
-                "AppLocker"
+            "Channel": [
+                "Microsoft-Windows-AppLocker/MSI and Script",
+                "Microsoft-Windows-AppLocker/EXE and DLL",
+                "Microsoft-Windows-AppLocker/Packaged app-Deployment",
+                "Microsoft-Windows-AppLocker/Packaged app-Execution"
             ]
         },
         "windows-category-create_remote_thread": {},
@@ -287,17 +287,20 @@ PRODUCT_CATEGORY_MAPPING = {
         "windows-category-registry_event": {},
         "windows-category-wmi_event": {},
         "windows-classicpowershell": {
-            "product_name": "Windows PowerShell"
+            "Channel": "Windows PowerShell"
+        },
+        "windows-codeintegrity-operational": {
+            "log_name": "Microsoft-Windows-CodeIntegrity/Operational"
         },
         "windows-create-remote-thread": {
             "product_name": "Sysmon",
             "vendor_id": "8"
         },
         "windows-defender": {
-            "product_name": "Windows Defender"
+            "Channel": "Microsoft-Windows-Windows Defender/Operational"
         },
         "windows-dhcp": {
-            "product_name": "DHCP-Server"
+            "Channel": "Microsoft-Windows-DHCP-Server/Operational"
         },
         "windows-dns": {
             "deviceProduct": "DNS-Server",
@@ -308,16 +311,16 @@ PRODUCT_CATEGORY_MAPPING = {
             "vendor_id": "22"
         },
         "windows-dns-server": {
-            "channel": "DNS Server"
+            "Channel": "DNS Server"
         },
         "windows-dns-server-audit": {
-            "channel": "DNS Server"
+            "LogName": "Microsoft-Windows-DNS-Server/Audit"
         },
         "windows-driver": {
             "deviceVendor": "Microsoft"
         },
         "windows-driver-framework": {
-            "product_name": "DriverFrameworks-UserMode"
+            "Channel": "Microsoft-Windows-DriverFrameworks-UserMode/Operational"
         },
         "windows-driver-load": {
             "product_name": "Sysmon",
@@ -340,18 +343,21 @@ PRODUCT_CATEGORY_MAPPING = {
             "product_name": "Sysmon",
             "vendor_id": "7"
         },
+        "windows-ladp-client-debug": {
+            "Channel": "Microsoft-Windows-LDAP-Client/Debug"
+        },
         "windows-ldap-query": {
             "channel": "Microsoft-Windows-LDAP-Client/Debug ETW"
         },
         "windows-msexchange-management": {
-            "channel": "MSExchange Management"
+            "Channel": "MSExchange Management"
         },
         "windows-network-connection": {
             "product_name": "Sysmon",
             "vendor_id": "3"
         },
         "windows-ntlm": {
-            "product_name": "NTLM"
+            "Channel": "Microsoft-Windows-NTLM/Operational"
         },
         "windows-pc": {
             "deviceVendor": "Microsoft"
@@ -364,29 +370,38 @@ PRODUCT_CATEGORY_MAPPING = {
             ]
         },
         "windows-power": {
-            "device.type": "winevent_nic"
+            "deviceVendor": "Microsoft"
         },
         "windows-powershell": {
-            "product_name": "PowerShell"
+            "Channel": "Microsoft-Windows-PowerShell/Operational"
         },
         "windows-powershell-classic": {},
         "windows-printservice-admin": {
-            "product_name": "PrintService"
+            "Channel": "Microsoft-Windows-PrintService/Admin"
         },
         "windows-printservice-operational": {
-            "product_name": "PrintService"
+            "Channel": "Microsoft-Windows-PrintService/Operational"
         },
         "windows-process-access": {
             "product_name": "Sysmon",
             "vendor_id": "10"
         },
-        "windows-process-creation": {
-            "product_name": "Sysmon",
-            "vendor_id": "1"
+        "windows-process-creation": {},
+        "windows-ps-classic-provider": {
+            "product_name": "Windows PowerShell",
+            "vendor_id": 600
+        },
+        "windows-ps-classic-script": {
+            "product_name": "Windows PowerShell",
+            "vendor_id": 800
         },
         "windows-ps-module": {
             "product_name": "PowerShell",
             "vendor_id": 4103
+        },
+        "windows-ps-script": {
+            "product_name": "PowerShell",
+            "vendor_id": 4104
         },
         "windows-raw-access-thread": {
             "product_name": "Sysmon",
@@ -400,11 +415,11 @@ PRODUCT_CATEGORY_MAPPING = {
             ]
         },
         "windows-sec": {
-            "device.type": "winevent_nic",
-            "event.source": "microsoft-windows-security-auditing"
+            "deviceProduct": "Microsoft Windows",
+            "deviceVendor": "Microsoft"
         },
         "windows-security": {
-            "product_name": "Security"
+            "Channel": "Security"
         },
         "windows-service-applocker": {},
         "windows-service-dns-server": {},
@@ -419,19 +434,22 @@ PRODUCT_CATEGORY_MAPPING = {
         "windows-service-windef": {},
         "windows-service-windefend": {},
         "windows-service-wmi": {},
+        "windows-servicebus-client": {
+            "Channel": "Microsoft-ServiceBus-Client"
+        },
         "windows-smbclient-security": {
-            "product_name": "SmbClient"
+            "Channel": "Microsoft-Windows-SmbClient/Security"
         },
         "windows-stream-hash": {
             "product_name": "Sysmon",
             "vendor_id": "15"
         },
         "windows-sys": {
-            "device.type": "winevent_nic",
-            "event.source": "microsoft-windows-security-auditing"
+            "deviceProduct": "Sysmon",
+            "deviceVendor": "Microsoft"
         },
         "windows-sysmon": {
-            "product_name": "Sysmon"
+            "Channel": "Microsoft-Windows-Sysmon/Operational"
         },
         "windows-sysmon-error": {
             "product_name": "Sysmon",
@@ -445,13 +463,19 @@ PRODUCT_CATEGORY_MAPPING = {
             ]
         },
         "windows-system": {
-            "product_name": "System"
+            "Channel": "System"
         },
         "windows-taskscheduler": {
-            "product_name": "TaskScheduler"
+            "LogName": "Microsoft-Windows-TaskScheduler/Operational"
+        },
+        "windows-taskscheduler-operational": {
+            "Channel": "Microsoft-Windows-TaskScheduler/Operational"
         },
         "windows-wmi": {
-            "product_name": "WMI-Activity"
+            "deviceVendor": "Microsoft"
+        },
+        "windows-wmi-activity-Operational": {
+            "Channel": "Microsoft-Windows-WMI-Activity/Operational"
         },
         "windows-wmi-sysmon": {
             "product_name": "Sysmon",
@@ -485,188 +509,188 @@ PRODUCT_CATEGORY_MAPPING = {
         "windows_defender": {}
     },
     "zeek": {
-        "zeek": {
-            "vendor_name": "Zeek IDS"
+        "zeek": {},
+        "zeek-conn": {
+            "@stream": "conn"
         },
-        "zeek-conn": {},
         "zeek-conn_long": {
-            "sourcetype": "bro:conn_long:json"
+            "@stream": "conn_long"
         },
         "zeek-dce_rpc": {
-            "sourcetype": "bro:dce_rpc:json"
+            "@stream": "dce_rpc"
         },
         "zeek-dnp3": {
-            "sourcetype": "bro:dnp3:json"
+            "@stream": "dnp3"
         },
         "zeek-dns": {
-            "sourcetype": "bro:dns:json"
+            "@stream": "dns"
         },
         "zeek-dpd": {
-            "sourcetype": "bro:dpd:json"
+            "@stream": "dpd"
         },
         "zeek-files": {
-            "sourcetype": "bro:files:json"
+            "@stream": "files"
         },
         "zeek-ftp": {
-            "sourcetype": "bro:ftp:json"
+            "@stream": "ftp"
         },
         "zeek-gquic": {
-            "sourcetype": "bro:gquic:json"
+            "@stream": "gquic"
         },
         "zeek-http": {
-            "sourcetype": "bro:http:json"
+            "@stream": "http"
         },
         "zeek-http2": {
-            "sourcetype": "bro:http2:json"
+            "@stream": "http2"
         },
         "zeek-intel": {
-            "sourcetype": "bro:intel:json"
+            "@stream": "intel"
         },
         "zeek-ip_search": {
-            "sourcetype": [
-                "bro:conn:json",
-                "bro:conn_long:json",
-                "bro:dce_rpc:json",
-                "bro:dhcp:json",
-                "bro:dnp3:json",
-                "bro:dns:json",
-                "bro:ftp:json",
-                "bro:gquic:json",
-                "bro:http:json",
-                "bro:irc:json",
-                "bro:kerberos:json",
-                "bro:modbus:json",
-                "bro:mqtt_connect:json",
-                "bro:mqtt_publish:json",
-                "bro:mqtt_subscribe:json",
-                "bro:mysql:json",
-                "bro:ntlm:json",
-                "bro:ntp:json",
-                "bro:radius:json",
-                "bro:rfb:json",
-                "bro:sip:json",
-                "bro:smb_files:json",
-                "bro:smb_mapping:json",
-                "bro:smtp:json",
-                "bro:smtp_links:json",
-                "bro:snmp:json",
-                "bro:socks:json",
-                "bro:ssh:json",
-                "bro:ssl:json",
-                "bro:tunnel:json",
-                "bro:weird:json"
+            "@stream": [
+                "conn",
+                "conn_long",
+                "dce_rpc",
+                "dhcp",
+                "dnp3",
+                "dns",
+                "ftp",
+                "gquic",
+                "http",
+                "irc",
+                "kerberos",
+                "modbus",
+                "mqtt_connect",
+                "mqtt_publish",
+                "mqtt_subscribe",
+                "mysql",
+                "ntlm",
+                "ntp",
+                "radius",
+                "rfb",
+                "sip",
+                "smb_files",
+                "smb_mapping",
+                "smtp",
+                "smtp_links",
+                "snmp",
+                "socks",
+                "ssh",
+                "tls",
+                "tunnel",
+                "weird"
             ]
         },
         "zeek-irc": {
-            "sourcetype": "bro:irc:json"
+            "@stream": "irc"
         },
         "zeek-kerberos": {
-            "sourcetype": "bro:kerberos:json"
+            "@stream": "kerberos"
         },
         "zeek-known_certs": {
-            "sourcetype": "bro:known_certs:json"
+            "@stream": "known_certs"
         },
         "zeek-known_hosts": {
-            "sourcetype": "bro:known_hosts:json"
+            "@stream": "known_hosts"
         },
         "zeek-known_modbus": {
-            "sourcetype": "bro:known_modbus:json"
+            "@stream": "known_modbus"
         },
         "zeek-known_services": {
-            "sourcetype": "bro:known_services:json"
+            "@stream": "known_services"
         },
         "zeek-modbus": {
-            "sourcetype": "bro:modbus:json"
+            "@stream": "modbus"
         },
         "zeek-modbus_register_change": {
-            "sourcetype": "bro:modbus_register_change:json"
+            "@stream": "modbus_register_change"
         },
         "zeek-mqtt_connect": {
-            "sourcetype": "bro:mqtt_connect:json"
+            "@stream": "mqtt_connect"
         },
         "zeek-mqtt_publish": {
-            "sourcetype": "bro:mqtt_publish:json"
+            "@stream": "mqtt_publish"
         },
         "zeek-mqtt_subscribe": {
-            "sourcetype": "bro:mqtt_subscribe:json"
+            "@stream": "mqtt_subscribe"
         },
         "zeek-mysql": {
-            "sourcetype": "bro:mysql:json"
+            "@stream": "mysql"
         },
         "zeek-notice": {
-            "sourcetype": "bro:notice:json"
+            "@stream": "notice"
         },
         "zeek-ntlm": {
-            "sourcetype": "bro:ntlm:json"
+            "@stream": "ntlm"
         },
         "zeek-ntp": {
-            "sourcetype": "bro:ntp:json"
+            "@stream": "ntp"
         },
         "zeek-ocsp": {
-            "sourcetype": "bro:ocsp:json"
+            "@stream": "ocsp"
         },
         "zeek-pe": {
-            "sourcetype": "bro:pe:json"
+            "@stream": "pe"
         },
         "zeek-pop3": {
-            "sourcetype": "bro:pop3:json"
+            "@stream": "pop3"
         },
         "zeek-radius": {
-            "sourcetype": "bro:radius:json"
+            "@stream": "radius"
         },
         "zeek-rdp": {
-            "sourcetype": "bro:rdp:json"
+            "@stream": "rdp"
         },
         "zeek-rfb": {
-            "sourcetype": "bro:rfb:json"
+            "@stream": "rfb"
         },
         "zeek-sip": {
-            "sourcetype": "bro:sip:json"
+            "@stream": "sip"
         },
         "zeek-smb_files": {
-            "sourcetype": "bro:smb_files:json"
+            "@stream": "smb_files"
         },
         "zeek-smb_mapping": {
-            "sourcetype": "bro:smb_mapping:json"
+            "@stream": "smb_mapping"
         },
         "zeek-smtp": {
-            "sourcetype": "bro:smtp:json"
+            "@stream": "smtp"
         },
         "zeek-smtp_links": {
-            "sourcetype": "bro:smtp_links:json"
+            "@stream": "smtp_links"
         },
         "zeek-snmp": {
-            "sourcetype": "bro:snmp:json"
+            "@stream": "snmp"
         },
         "zeek-socks": {
-            "sourcetype": "bro:socks:json"
+            "@stream": "socks"
         },
         "zeek-software": {
-            "sourcetype": "bro:software:json"
+            "@stream": "software"
         },
         "zeek-ssh": {
-            "sourcetype": "bro:ssh:json"
+            "@stream": "ssh"
         },
         "zeek-ssl": {
-            "sourcetype": "bro:ssl:json"
+            "@stream": "ssl"
         },
         "zeek-syslog": {
-            "sourcetype": "bro:syslog:json"
+            "@stream": "syslog"
         },
         "zeek-tls": {
-            "sourcetype": "bro:ssl:json"
+            "@stream": "ssl"
         },
         "zeek-traceroute": {
-            "sourcetype": "bro:traceroute:json"
+            "@stream": "traceroute"
         },
         "zeek-tunnel": {
-            "sourcetype": "bro:tunnel:json"
+            "@stream": "tunnel"
         },
         "zeek-weird": {
-            "sourcetype": "bro:weird:json"
+            "@stream": "weird"
         },
         "zeek-x509": {
-            "sourcetype": "bro:x509:json"
+            "@stream": "x509"
         }
     }
 }

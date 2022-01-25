@@ -5,3 +5,4 @@ lark-parser
 xmltodict
 PyYAML
 evtx
+clint

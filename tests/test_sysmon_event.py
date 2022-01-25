@@ -4,7 +4,7 @@ Find way to validate that events are hitting on the right rules
 import os
 import os.path
 import pytest
-from pysigma import PySigma, parser, load_events
+from pysigma import PySigma, parser
 
 
 RULE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../rules'))
@@ -64,7 +64,7 @@ def test_init():
     # initialize pysigma
     sigma_parser = PySigma()
     assert sigma_parser.rules == {}
-    assert sigma_parser.callback is None
+    assert sigma_parser.callback is not None
 
 
 def check_events(self, events):
@@ -82,4 +82,3 @@ def test_check_logfile(sigma_parser):
                          'score': 'high',
                          'signature_source': None,
                          'title': 'System File Execution Location Anomaly'}
-
