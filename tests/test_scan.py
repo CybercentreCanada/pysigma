@@ -16,8 +16,8 @@ detection:
     true_expected: # dogs or dog_count
         - go?d
         - 2
-    true_also_expected: # (dogs good or dogs ok) and cats good 
-        dogs: 
+    true_also_expected: # (dogs good or dogs ok) and cats good
+        dogs:
             - good
             - ok
         cats: good
@@ -95,7 +95,7 @@ def test_null_and_not_null():
 def test_substrings():
     # Is this what that part of the standard meant about list of strings anywhere?
     sigma = PySigma()
-    sigma.add_signature("""        
+    sigma.add_signature("""
         title: sample signature
         detection:
             signs:
@@ -155,18 +155,18 @@ def test_escaped_wildcards():
 
 
 def test_regex_transform():
-    import re
+    import regex as re
     assert sigma_string_to_regex(r'.') == r'\.'
     assert sigma_string_to_regex(r'*') == r'.*'
-    assert sigma_string_to_regex(r'?')  == r'.'
-    assert sigma_string_to_regex(r'.\*')  == r'\.\*'
-    assert sigma_string_to_regex(r'.\?')  == r'\.\?'
-    assert sigma_string_to_regex(r'.\*abc')  == r'\.\*abc'
-    assert sigma_string_to_regex(r'.\*abc*')  == r'\.\*abc.*'
-    assert sigma_string_to_regex(r'.\*abc?')  == r'\.\*abc.'
-    assert sigma_string_to_regex(r'.\*abc\?')  == r'\.\*abc\?'
-    assert sigma_string_to_regex(r'.\*abc\\?')  == r'\.\*abc\\.'
-    assert sigma_string_to_regex(r'.\*abc\\\?')  == r'\.\*abc\\\\.'
+    assert sigma_string_to_regex(r'?') == r'.'
+    assert sigma_string_to_regex(r'.\*') == r'\.\*'
+    assert sigma_string_to_regex(r'.\?') == r'\.\?'
+    assert sigma_string_to_regex(r'.\*abc') == r'\.\*abc'
+    assert sigma_string_to_regex(r'.\*abc*') == r'\.\*abc.*'
+    assert sigma_string_to_regex(r'.\*abc?') == r'\.\*abc.'
+    assert sigma_string_to_regex(r'.\*abc\?') == r'\.\*abc\?'
+    assert sigma_string_to_regex(r'.\*abc\\?') == r'\.\*abc\\.'
+    assert sigma_string_to_regex(r'.\*abc\\\?') == r'\.\*abc\\\\.'
     #assert sigma_string_to_regex(r'*\abc\*')  == r'.*\abc\.*'
     assert re.compile(sigma_string_to_regex(r'a\a')).fullmatch(r'a\a')
     assert re.compile(sigma_string_to_regex(r'a\\a')).fullmatch(r'a\\a')
@@ -177,7 +177,7 @@ def test_regex_transform():
 def test_1_of_them():
     # Make sure 1
     sigma = PySigma()
-    sigma.add_signature("""        
+    sigma.add_signature("""
         title: sample signature
         detection:
             a: ["a"]
@@ -194,7 +194,7 @@ def test_1_of_them():
 def test_1_of_x():
     # Make sure 1
     sigma = PySigma()
-    sigma.add_signature("""        
+    sigma.add_signature("""
         title: sample signature
         detection:
             aa: ["aa"]
@@ -213,7 +213,7 @@ def test_1_of_x():
 def test_all_of_them():
     # Make sure 1
     sigma = PySigma()
-    sigma.add_signature("""        
+    sigma.add_signature("""
         title: sample signature
         detection:
             a: ["a"]
@@ -231,7 +231,7 @@ def test_all_of_them():
 def test_all_of_x():
     # Make sure 1
     sigma = PySigma()
-    sigma.add_signature("""        
+    sigma.add_signature("""
         title: sample signature
         detection:
             aa: ["aa"]
@@ -245,4 +245,3 @@ def test_all_of_x():
     assert len(sigma.check_events([{'log': '1ab ba ca', 'Data': []}])) == 0
     assert len(sigma.check_events([{'log': 'ba', 'Data': []}])) == 0
     assert len(sigma.check_events([{'log': 'aabb', 'Data': []}])) == 1
-

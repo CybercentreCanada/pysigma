@@ -1,6 +1,6 @@
 
 import fnmatch
-import re
+import regex as re
 from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -218,9 +218,3 @@ def analyze_x_of(signature, event, count, selector):
         if search_misses > permitted_misses:
             return False
     return False
-
-
-
-
-
-
