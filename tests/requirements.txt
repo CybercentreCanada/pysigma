@@ -6,3 +6,4 @@ xmltodict
 PyYAML
 evtx
 clint
+regex

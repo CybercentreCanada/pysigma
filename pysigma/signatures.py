@@ -1,7 +1,7 @@
 import os
 from typing import Dict, List, IO, Union, Any, Optional, Callable, Tuple
 import base64
-import re
+import regex as re
 
 import yaml
 

@@ -1,5 +1,5 @@
 import argparse
-import re
+import regex as re
 from pathlib import Path
 from textwrap import dedent
 import yaml
