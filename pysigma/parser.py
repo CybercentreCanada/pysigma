@@ -72,6 +72,29 @@ def check_event(raw_event, rules):
     return alerts
 
 
+def get_category(event):
+    channel = event.get("Channel").lower()
+    for product, category_spec in PRODUCT_CATEGORY_MAPPING.items():
+        if product in channel:
+            for category, conditions in category_spec.items():
+                # Can't trust verifying against categories with no conditions (ambiguous)
+                if not conditions:
+                    continue
+                condition_valid = True
+                for c_name, c_value in conditions.items():
+                    # If the event doesn't contain the condition params, ignore it
+                    if not event.get(c_name):
+                        condition_valid = False
+                        break
+
+                    if isinstance(c_value, int):
+                        condition_valid = condition_valid & (int(event[c_name]) == c_value)
+                    else:
+                        condition_valid=condition_valid & (event[c_name] in c_value)
+                if condition_valid:
+                    return category
+    return None
+
 def _get_relevant_rules(event: dict, rules: Dict[str, Any]) -> Dict[str, Any]:
     """
     This method grabs a subset of the Sigma rules that are relevant to the event
@@ -80,31 +103,6 @@ def _get_relevant_rules(event: dict, rules: Dict[str, Any]) -> Dict[str, Any]:
     :param rules: All Sigma rules
     :return: A subset of relevant Sigma rules for the channel
     """
-
-    def get_category(event):
-        channel = event.get("Channel").lower()
-        for product, category_spec in PRODUCT_CATEGORY_MAPPING.items():
-            if product in channel:
-                for category, conditions in category_spec.items():
-                    # Can't trust verifying against categories with no conditions (ambiguous)
-                    if not conditions:
-                        continue
-                    condition_valid = True
-                    for c_name, c_value in conditions.items():
-
-                        # If the event doesn't contain the condition params, ignore it
-                        if not event.get(c_name):
-                            condition_valid = False
-                            break
-
-                        if isinstance(c_value, int):
-                            condition_valid = condition_valid & (int(event[c_name]) == c_value)
-                        else:
-                            condition_valid=condition_valid & (event[c_name] in c_value)
-                    if condition_valid:
-                        return category
-        return None
-
     if not event.get("Channel"):
         return rules
 
