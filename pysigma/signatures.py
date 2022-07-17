@@ -28,9 +28,16 @@ SUPPORTED_MODIFIERS = {
     # 're',
 }
 
+
+def decode_base64(x: str) -> str:
+    # support both RFC 2045 style encoding & non-RFC 2045 style encoding
+    x = x.replace("\n", "")
+    return base64.b64encode(x.encode()).decode()
+
+
 MODIFIER_FUNCTIONS = {
     'contains': lambda x: f'.*{x}.*',
-    'base64': lambda x: base64.encodebytes(x.encode()).decode(),
+    'base64': lambda x: decode_base64(x),
     'endswith': lambda x: f'.*{x}$',
     'startswith': lambda x: f'^{x}.*',
 }

@@ -1,3 +1,5 @@
+import base64
+
 from pysigma import PySigma
 from pysigma.signatures import sigma_string_to_regex
 
@@ -245,3 +247,18 @@ def test_all_of_x():
     assert len(sigma.check_events([{'log': '1ab ba ca', 'Data': []}])) == 0
     assert len(sigma.check_events([{'log': 'ba', 'Data': []}])) == 0
     assert len(sigma.check_events([{'log': 'aabb', 'Data': []}])) == 1
+
+
+def test_base64():
+    sigma = PySigma()
+    sigma.add_signature("""
+        title: sample signature
+        detection:
+            base64:
+              a|base64: foo
+            condition: base64
+    """)
+
+    assert len(sigma.check_events([{"a": base64.b64encode(b"foo").decode()}])) == 1
+    assert len(sigma.check_events([{"a": base64.encodebytes(b"foo").decode()}])) == 1
+    assert len(sigma.check_events([{"a": "foo"}])) == 0
