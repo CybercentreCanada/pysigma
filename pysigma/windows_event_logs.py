@@ -60,7 +60,7 @@ def convert_event_data_to_key_value(event_dict):
     :param event_dict: event
     :return: k,v Data section
     """
-    if not 'Data' in event_dict:
+    if not isinstance(event_dict.get('Data', 0), list):
         # then return evtx log unchanged
         return event_dict
     tempdict = {}
