@@ -15,17 +15,22 @@ def load_events(log_file_name):
     """
     try:
         with open(log_file_name, "r", encoding='utf-8', errors='ignore') as fp:
-            magic = fp.read(7)
+            data = fp.read()
+            magic = data[:7]
             fp.seek(0)
             if magic == 'ElfFile':
                 # log is evtx type
                 parser = PyEvtxParser(log_file_name)
                 dictrecords = [json.loads(rec['data']) for rec in parser.records_json()]
                 return dictrecords, 'evtx'
-            elif magic == '<Events':
-                return xmltodict.parse(fp.read()), 'xml'
+            elif "EventID" in data:
+                events = xmltodict.parse(data)
+                if not events.get('Events'):
+                    # Single event was given, modify object to be nested within 'Events' block
+                    events = xmltodict.parse(f"<Events>{data}</Events>")
+                return events, 'xml'
             else:
-                raise Exception('Invalid File magic')
+                raise TypeError('Unsupported file given')
 
     except ExpatError:
         raise KeyError("Error: Format error in the Event log file")
