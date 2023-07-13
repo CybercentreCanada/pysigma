@@ -21,7 +21,14 @@ def load_events(log_file_name):
             if magic == 'ElfFile':
                 # log is evtx type
                 parser = PyEvtxParser(log_file_name)
-                dictrecords = [json.loads(rec['data']) for rec in parser.records_json()]
+                dictrecords = []
+                try:
+                    for rec in parser.records_json():
+                        dictrecords.append(json.loads(rec['data']))
+                except RuntimeError:
+                    # Parsing error: https://github.com/omerbenamram/evtx/issues/227
+                    # Continue with the records that were collected
+                    pass
                 return dictrecords, 'evtx'
             elif "EventID" in data:
                 events = xmltodict.parse(data)
