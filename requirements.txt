@@ -1,5 +1,5 @@
 clint
-lark-parser
+lark >= 1.1.7, < 2.0
 xmltodict
 PyYAML
 evtx
