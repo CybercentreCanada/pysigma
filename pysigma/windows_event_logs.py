@@ -1,9 +1,9 @@
+from collections.abc import MutableMapping
 from xml.parsers.expat import ExpatError
 from io import open
 from evtx import PyEvtxParser
 
 import json
-import collections
 import xmltodict
 
 
@@ -31,7 +31,13 @@ def load_events(log_file_name):
                     pass
                 return dictrecords, 'evtx'
             elif "EventID" in data:
-                events = xmltodict.parse(data)
+                try:
+                    events = xmltodict.parse(data)
+                except ExpatError:
+                    if data.count('<Event') > 1:
+                        # Contains a series of single events but aren't wrapped within an 'Events block'
+                        events = xmltodict.parse(f"<Events>{data}</Events>")
+
                 if not events.get('Events'):
                     # Single event was given, modify object to be nested within 'Events' block
                     events = xmltodict.parse(f"<Events>{data}</Events>")
@@ -52,7 +58,7 @@ def flattened(event):
 
     items = []
     for key, value in event.items():
-        if isinstance(value, collections.MutableMapping):
+        if isinstance(value, MutableMapping):
             items.extend(flattened(value).items())
         else:
             items.append((key, value))
