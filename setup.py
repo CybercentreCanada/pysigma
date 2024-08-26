@@ -16,7 +16,7 @@ with open('requirements.txt', 'r') as fh:
 
 with TemporaryDirectory() as clone_dir:
     # Create mapping the Sigma library uses and dump to disk
-    Repo.clone_from("https://github.com/SigmaHQ/sigma.git", clone_dir)
+    Repo.clone_from("https://github.com/SigmaHQ/legacy-sigmatools.git", clone_dir)
     master_config = defaultdict(dict)
     for root, dirs, files in os.walk(os.path.join(clone_dir, "tools/config")):
         for file in files:
