@@ -30,7 +30,18 @@ jobs:
           cd $install_path
           sudo env "PATH=$PATH" python -m pip install -U -r `pwd`/tests/requirements.txt
         displayName: Setup environment
-      - script: python -m pytest --durations=10 -rsx -vv --cov-report=xml --cov=pysigma
+      - script: python -m pytest --durations=10 -rsx -vv --cov-report=xml:coverage-$PYTHON_VERSION.xml --cov=pysigma --junitxml=test-results-$PYTHON_VERSION.xml || exit 1
         displayName: Test
-      - script: python -m codecov
-        displayName: Upload Coverage
+      - task: PublishTestResults@2
+        condition: and(succeededOrFailed(), ne(variables.no_tests, true))
+        inputs:
+          testResultsFiles: "test-results-$(python.version).xml"
+          testRunTitle: "Publish test results for Python $(python.version)"
+      # use v1 as detailed reports not possible through v2
+      # https://github.com/microsoft/azure-pipelines-tasks/issues/19295
+      - task: PublishCodeCoverageResults@1
+        condition: and(succeededOrFailed(), ne(variables.no_tests, true))
+        displayName: "Publish code coverage from Python $(python.version)"
+        inputs:
+          codeCoverageTool: Cobertura
+          summaryFileLocation: "coverage-$(python.version).xml"
