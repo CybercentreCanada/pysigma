@@ -4,31 +4,44 @@ trigger: ["*"]
 pr: ["*"]
 
 pool:
-  vmImage: 'ubuntu-18.04'
+  vmImage: "ubuntu-20.04"
 
 jobs:
-- job: run_test
-  strategy:
-    matrix:
-      python3_7:
-        python.version: '3.7'
-      Python3_8:
-        python.version: '3.8'
+  - job: run_test
+    strategy:
+      matrix:
+        python3_9:
+          python.version: "3.9"
+        Python3_10:
+          python.version: "3.10"
+        Python3_11:
+          python.version: "3.11"
 
-  timeoutInMinutes: 10
+    timeoutInMinutes: 10
 
-  steps:
-    - task: UsePythonVersion@0
-      displayName: Set python version
-      inputs:
-        versionSpec: '$(python.version)'
-    - script: |
-        install_path=`pwd`
-        sudo apt-get update
-        cd $install_path
-        sudo env "PATH=$PATH" python -m pip install -U -r `pwd`/tests/requirements.txt
-      displayName: Setup environment
-    - script: python -m pytest --durations=10 -rsx -vv --cov-report=xml --cov=pysigma
-      displayName: Test
-    - script: python -m codecov
-      displayName: Upload Coverage
+    steps:
+      - task: UsePythonVersion@0
+        displayName: Set python version
+        inputs:
+          versionSpec: "$(python.version)"
+      - script: |
+          install_path=`pwd`
+          sudo apt-get update
+          cd $install_path
+          sudo env "PATH=$PATH" python -m pip install -U -r `pwd`/tests/requirements.txt
+        displayName: Setup environment
+      - script: python -m pytest --durations=10 -rsx -vv --cov-report=xml:coverage-$PYTHON_VERSION.xml --cov=pysigma --junitxml=test-results-$PYTHON_VERSION.xml || exit 1
+        displayName: Test
+      - task: PublishTestResults@2
+        condition: and(succeededOrFailed(), ne(variables.no_tests, true))
+        inputs:
+          testResultsFiles: "test-results-$(python.version).xml"
+          testRunTitle: "Publish test results for Python $(python.version)"
+      # use v1 as detailed reports not possible through v2
+      # https://github.com/microsoft/azure-pipelines-tasks/issues/19295
+      - task: PublishCodeCoverageResults@1
+        condition: and(succeededOrFailed(), ne(variables.no_tests, true))
+        displayName: "Publish code coverage from Python $(python.version)"
+        inputs:
+          codeCoverageTool: Cobertura
+          summaryFileLocation: "coverage-$(python.version).xml"
