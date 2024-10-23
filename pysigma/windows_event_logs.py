@@ -81,6 +81,10 @@ def convert_event_data_to_key_value(event_dict):
     event_dict.update({'StartModule': None})
 
     for item in data:
+        if not isinstance(item, dict):
+            # Unexpected <Data> block format, skipping..
+            print("Error in Data Section: Formatting")
+            break
         key = 0
         value = 0
         for k, v in item.items():
