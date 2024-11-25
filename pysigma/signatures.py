@@ -12,11 +12,11 @@ from .parser import prepare_condition
 class SignatureLoadError(KeyError):
     pass
 
-class PatchedSafeLoader(yaml.SafeLoader):
-    def __init__(self, stream):
-        super().__init__(stream)
-        # Avoid auto-resolution to "tag:yaml.org,2002:value" when encountering '='
-        self.yaml_implicit_resolvers.pop('=')
+class PatchedSafeLoader(yaml.SafeLoader):     
+    yaml_implicit_resolvers = yaml.SafeLoader.yaml_implicit_resolvers.copy()
+    
+    # Avoid auto-resolution to "tag:yaml.org,2002:value" when encountering '='
+    yaml_implicit_resolvers.pop('=')
 
 # TODO We need to support the rest of them
 SUPPORTED_MODIFIERS = {
