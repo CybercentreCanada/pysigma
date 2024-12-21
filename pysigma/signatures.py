@@ -23,7 +23,7 @@ SUPPORTED_MODIFIERS = {
     'contains',
     'all',
     'base64',
-    'base64offset'
+    'base64offset',
     'endswith',
     'startswith',
     # 'utf16le',
