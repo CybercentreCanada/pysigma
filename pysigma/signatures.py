@@ -34,7 +34,7 @@ SUPPORTED_MODIFIERS = {
 }
 
 
-def decode_base64(x: str) -> str:
+def apply_base64_modifier(x: str) -> str:
     # support both RFC 2045 style encoding & non-RFC 2045 style encoding
     x = x.replace("\n", "")
     return base64.b64encode(x.encode()).decode()
@@ -60,7 +60,7 @@ def apply_base64offset_modifier(x: str) -> str:
 
 MODIFIER_FUNCTIONS = {
     'contains': lambda x: f'.*{x}.*',
-    'base64': lambda x: decode_base64(x),
+    'base64': lambda x: apply_base64_modifier(x),
     "base64offset": lambda x: apply_base64offset_modifier(x),
     'endswith': lambda x: f'.*{x}$',
     'startswith': lambda x: f'^{x}.*',
