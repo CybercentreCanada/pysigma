@@ -12,9 +12,9 @@ from .parser import prepare_condition
 class SignatureLoadError(KeyError):
     pass
 
-class PatchedSafeLoader(yaml.SafeLoader):     
+class PatchedSafeLoader(yaml.SafeLoader):
     yaml_implicit_resolvers = yaml.SafeLoader.yaml_implicit_resolvers.copy()
-    
+
     # Avoid auto-resolution to "tag:yaml.org,2002:value" when encountering '='
     yaml_implicit_resolvers.pop('=')
 
@@ -23,7 +23,7 @@ SUPPORTED_MODIFIERS = {
     'contains',
     'all',
     'base64',
-    # 'base64offset'
+    'base64offset',
     'endswith',
     'startswith',
     # 'utf16le',
@@ -34,15 +34,34 @@ SUPPORTED_MODIFIERS = {
 }
 
 
-def decode_base64(x: str) -> str:
+def apply_base64_modifier(x: str) -> str:
     # support both RFC 2045 style encoding & non-RFC 2045 style encoding
     x = x.replace("\n", "")
     return base64.b64encode(x.encode()).decode()
 
+def apply_base64offset_modifier(x: str) -> str:
+    # modified from https://github.com/SigmaHQ/pySigma
+    # (https://github.com/SigmaHQ/pySigma/blob/main/sigma/modifiers.py: SigmaBase64OffsetModifier)
+    x = x.replace("\n", "")
+
+    start_offsets = (0, 2, 3)
+    end_offsets = (None, -3, -2)
+
+    offsets: list[str] = []
+    for i in range(3):
+        offsets.append(
+            base64.b64encode(i * b" " + x.encode())[
+                start_offsets[i] : end_offsets[(len(x) + i) % 3]
+            ].decode()
+        )
+
+    return f"({'|'.join(offsets)})"
+
 
 MODIFIER_FUNCTIONS = {
     'contains': lambda x: f'.*{x}.*',
-    'base64': lambda x: decode_base64(x),
+    'base64': lambda x: apply_base64_modifier(x),
+    "base64offset": lambda x: apply_base64offset_modifier(x),
     'endswith': lambda x: f'.*{x}$',
     'startswith': lambda x: f'^{x}.*',
 }
